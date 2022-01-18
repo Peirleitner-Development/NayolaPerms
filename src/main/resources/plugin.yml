@@ -1,0 +1,8 @@
+name: Template
+version: 1.0.0-SNAPSHOT
+author: Markus Peirleitner (Rengobli)
+website: [www.peirleitner.at, www.nayola.net]
+api-version: 1.18
+depend: [NayolaCoreSpigot]
+
+main: net.nayola.template.Template
