@@ -31,7 +31,7 @@ public class Template extends JavaPlugin {
 
 		if (!Bukkit.getPluginManager().isPluginEnabled("NayolaCoreSpigot")) {
 			Bukkit.getConsoleSender()
-					.sendMessage(ChatColor.RED + "NayolaCoreSpigot is not loaded! Disabling TEMPLATE Plugin.");
+					.sendMessage(ChatColor.RED + "NayolaCoreSpigot is not loaded! Disabling " + this.getDescription().getName() + " Plugin.");
 			Bukkit.getPluginManager().disablePlugin(this);
 			return;
 		}
@@ -134,8 +134,6 @@ public class Template extends JavaPlugin {
 		// Listener
 
 		// Inventories
-
-		// AdminShop
 
 	}
 
