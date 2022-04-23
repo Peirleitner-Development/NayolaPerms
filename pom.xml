@@ -17,6 +17,12 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 	</build>
 	<repositories>
 		<repository>
@@ -36,7 +42,7 @@
 		<dependency>
 			<groupId>net.nayola.core</groupId>
 			<artifactId>NayolaCore</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.5</version>
 		</dependency>
 	</dependencies>
 </project>
