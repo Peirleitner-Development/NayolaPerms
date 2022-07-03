@@ -1,8 +1,8 @@
-name: Template
+name: NayolaPerms
 version: '${project.version}'
 author: Markus Peirleitner (Rengobli)
 website: [www.peirleitner.at, www.nayola.net]
-api-version: 1.18
+api-version: 1.19
 depend: [NayolaCoreSpigot]
 
-main: net.nayola.template.Template
+main: net.nayola.nayolaperms.NayolaPerms
