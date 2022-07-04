@@ -6,3 +6,13 @@ api-version: 1.19
 depend: [NayolaCoreSpigot]
 
 main: net.nayola.nayolaperms.NayolaPerms
+
+commands:
+  nayolaperms:
+    usage: </command>
+    description: Permission Management
+    aliases: [np]
+  rank:
+    usage: </command>
+    description: Current rank information
+    aliases: [rang, perm, permission, group]

@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,7 +19,9 @@ import net.nayola.core.util.EconomyType;
 import net.nayola.core.util.LogType;
 import net.nayola.core.util.MySQL;
 import net.nayola.core.util.Rank;
-import net.nayola.nayolaperms.listener.PlayerJoinListener;
+import net.nayola.nayolaperms.command.CommandNayolaPerms;
+import net.nayola.nayolaperms.command.CommandRank;
+import net.nayola.nayolaperms.listener.AsyncPlayerPreLoginListener;
 import net.nayola.nayolaperms.listener.PlayerQuitListener;
 import net.nayola.nayolaperms.manager.PermissionManager;
 
@@ -86,9 +90,11 @@ public class NayolaPerms extends JavaPlugin {
 		this.permissionManager = new PermissionManager();
 
 		// Commands
+		new CommandNayolaPerms();
+		new CommandRank();
 
 		// Listener
-		new PlayerJoinListener();
+		new AsyncPlayerPreLoginListener();
 		new PlayerQuitListener();
 
 	}
@@ -144,9 +150,26 @@ public class NayolaPerms extends JavaPlugin {
 
 		LanguageManagerSpigot languageManager = NayolaCore.getInstance().getLanguageManagerSpigot();
 
+		// Main
+		languageManager.registerNewMessage(this, "main.no-permission", "&cThis action requires the rank &7[&e{0}&7] &cor higher&7.");
+		
 		// Commands
+		languageManager.registerNewMessage(this, "command.rank.permanent", "&3Your current rank &e{0} &3never expires&7.");
+		languageManager.registerNewMessage(this, "command.rank.temporary", "&3Your current rank &e{0} &3expires on &e{1}&7.");
+		languageManager.registerNewMessage(this, "command.nayolaperms.syntax", "&3Help for NayolaPerms version &e{0}&8:\n"
+				+ "&3/nayolaperms\n"
+				+ "  &egroup &6create &f<Name> <DisplayName> <Icon> <Color> <Default> <Priority>\n" // 8
+				+ "  &egroup &6set &f<Player> <Group> [Days]\n" // 4-5
+				+ "  &egroup &6get &f<Player>\n" // 3
+				+ "  &epermission &6get &f<Group>\n" // 3
+				+ "  &epermission &6add &f<Group> <Permission>\n" // 4
+				+ "  &epermission &6remove &f<Group> <Permission>\n" // 4
+				+ "  &eplayer &6get &f<Player>\n" // 3
+				+ "  &ereload"); 
+		languageManager.registerNewMessage(this, "command.nayolaperms.group.create.error.name-already-exists", "&cGroup with the name '&e{0}&c' does already exist&7.");
 
 		// Listener
+		languageManager.registerNewMessage(this, "listener.join.error.could-not-create-player", "&cCould not create new player permission object; connection cancelled.");
 
 		// Inventories
 
@@ -158,6 +181,7 @@ public class NayolaPerms extends JavaPlugin {
 		this.getMySQL().prepareStatement("CREATE TABLE IF NOT EXISTS " + table_groups + " ("
 				+ "id INT AUTO_INCREMENT NOT NULL, "
 				+ "name VARCHAR(100) NOT NULL, "
+				+ "displayName VARCHAR(100) NOT NULL, "
 				+ "icon VARCHAR(100) NOT NULL DEFAULT 'COBBLESTONE', "
 				+ "hexColor CHAR(6) NOT NULL DEFAULT 'ffffff', "
 				+ "isDefault BOOLEAN NOT NULL DEFAULT '0', "

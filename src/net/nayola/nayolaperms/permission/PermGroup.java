@@ -2,6 +2,8 @@ package net.nayola.nayolaperms.permission;
 
 import org.bukkit.Material;
 
+import net.md_5.bungee.api.ChatColor;
+
 /**
  * This class represents a permission group.
  * 
@@ -13,18 +15,13 @@ public class PermGroup {
 
 	private int id;
 	private String name;
+	private String displayName;
 	private Material icon;
 	private String hexColor;
 	private boolean isDefault;
 	private int priority;
 
-	public PermGroup(int id, String name, Material icon, String hexColor, boolean isDefault, int priority) {
-		this.id = id;
-		this.name = name;
-		this.icon = icon;
-		this.hexColor = hexColor;
-		this.isDefault = isDefault;
-		this.priority = priority;
+	public PermGroup() {
 	}
 
 	public final int getID() {
@@ -39,8 +36,24 @@ public class PermGroup {
 		return name;
 	}
 
+	public final String getColoredName() {
+		return this.getChatColor() + this.getName();
+	}
+
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public final String getColoredDisplayName() {
+		return this.getChatColor() + this.getDisplayName();
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	public final Material getIcon() {
@@ -57,6 +70,10 @@ public class PermGroup {
 
 	public void setHexColor(String hexColor) {
 		this.hexColor = hexColor;
+	}
+
+	public final ChatColor getChatColor() {
+		return ChatColor.of("#" + this.getHexColor());
 	}
 
 	public final boolean isDefault() {

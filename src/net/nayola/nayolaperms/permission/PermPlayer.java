@@ -2,6 +2,9 @@ package net.nayola.nayolaperms.permission;
 
 import java.util.UUID;
 
+import net.nayola.core.NayolaCore;
+import net.nayola.nayolaperms.NayolaPerms;
+
 /**
  * This class represents a player on the server
  * 
@@ -51,7 +54,7 @@ public class PermPlayer {
 	 * @author Markus Peirleitner (Rengobli)
 	 */
 	public final PermGroup getGroup() {
-		return null;
+		return NayolaPerms.getInstance().getPermissionManager().getGroupByID(this.getGroupID());
 	}
 
 	public void setGroupID(int groupID) {
@@ -68,7 +71,15 @@ public class PermPlayer {
 	public final long getExpire() {
 		return expire;
 	}
+	
+	public final String getExpireDateAsString() {
+		return NayolaCore.getInstance().getUtilManager().getDate(this.getExpire());
+	}
 
+	public final boolean isSetToExpire() {
+		return this.getExpire() != -1;
+	}
+	
 	public void setExpire(long expire) {
 		this.expire = expire;
 	}
