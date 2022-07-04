@@ -157,28 +157,28 @@ public class NayolaPerms extends JavaPlugin {
 		// Groups
 		this.getMySQL().prepareStatement("CREATE TABLE IF NOT EXISTS " + table_groups + " ("
 				+ "id INT AUTO_INCREMENT NOT NULL, "
-				+ "name VARCHAR(100) PRIMARY KEY NOT NULL, "
+				+ "name VARCHAR(100) NOT NULL, "
 				+ "icon VARCHAR(100) NOT NULL DEFAULT 'COBBLESTONE', "
 				+ "hexColor CHAR(6) NOT NULL DEFAULT 'ffffff', "
 				+ "isDefault BOOLEAN NOT NULL DEFAULT '0', "
-				+ "priority INT NOT NULL DEFAULT '100'"
-				+ ");");
+				+ "priority INT NOT NULL DEFAULT '100', "
+				+ "PRIMARY KEY (id, name));");
 		
 		// Players
 		this.getMySQL().prepareStatement("CREATE TABLE IF NOT EXISTS " + table_players + " ("
 				+ "uuid CHAR(36) PRIMARY KEY NOT NULL, "
-				+ "group int NOT NULL, "
+				+ "groupID INT NOT NULL, "
 				+ "expire BIGINT(255) NOT NULL DEFAULT '-1', "
-				+ "FOREIGN KEY(group) REFERENCES (" + table_groups + ".id)"
+				+ "FOREIGN KEY (groupID) REFERENCES " + table_groups + "(id)"
 						+ ");");
 		
 		// Permissions
 		this.getMySQL().prepareStatement("CREATE TABLE IF NOT EXISTS " + table_permissions + "("
 				+ "permission VARCHAR(100) NOT NULL, "
-				+ "group INT NOT NULL, "
+				+ "groupID INT NOT NULL, "
 				+ "server INT NOT NULL, "
-				+ "PRIMARY KEY (permission, group, server), "
-				+ "FOREIGN KEY(group) REFERENCES (" + table_groups + ".id)"
+				+ "PRIMARY KEY (permission, groupID, server), "
+				+ "FOREIGN KEY (groupID) REFERENCES " + table_groups + "(id)"
 				+ ");");
 		
 	}
