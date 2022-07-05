@@ -19,6 +19,7 @@ import net.nayola.core.util.EconomyType;
 import net.nayola.core.util.LogType;
 import net.nayola.core.util.MySQL;
 import net.nayola.core.util.Rank;
+import net.nayola.nayolaperms.command.CommandGroups;
 import net.nayola.nayolaperms.command.CommandNayolaPerms;
 import net.nayola.nayolaperms.command.CommandRank;
 import net.nayola.nayolaperms.listener.AsyncPlayerPreLoginListener;
@@ -92,6 +93,7 @@ public class NayolaPerms extends JavaPlugin {
 		// Commands
 		new CommandNayolaPerms();
 		new CommandRank();
+		new CommandGroups();
 
 		// Listener
 		new AsyncPlayerPreLoginListener();
@@ -156,6 +158,8 @@ public class NayolaPerms extends JavaPlugin {
 		// Commands
 		languageManager.registerNewMessage(this, "command.rank.permanent", "&3Your current rank &e{0} &3never expires&7.");
 		languageManager.registerNewMessage(this, "command.rank.temporary", "&3Your current rank &e{0} &3expires on &e{1}&7.");
+		languageManager.registerNewMessage(this, "command.groups.list", "&3The following groups are available&8:");
+		languageManager.registerNewMessage(this, "command.groups.group", "&8- &e{0}");
 		languageManager.registerNewMessage(this, "command.nayolaperms.syntax", "&3Help for NayolaPerms version &e{0}&8:\n"
 				+ "&3/nayolaperms\n"
 				+ "  &egroup &6create &f<Name> <DisplayName> <Icon> <Color> <Default> <Priority>\n" // 8

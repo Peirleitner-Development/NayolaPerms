@@ -16,3 +16,7 @@ commands:
     usage: </command>
     description: Current rank information
     aliases: [rang, perm, permission, group]
+  groups:
+    usage: </command>
+    description: List all existing groups
+    aliases: [ranks]

@@ -6,6 +6,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -42,6 +45,33 @@ public class PermissionManager {
 		return groups;
 	}
 	
+	public List<PermGroup> getGroupsInOrder() {
+		
+		List<Integer> list = new ArrayList<>();
+		
+		for(PermGroup group : this.getGroups()) {
+			list.add(group.getPriority());
+		}
+		
+		Collections.sort(list, Collections.reverseOrder());
+		
+		List<PermGroup> groups = new ArrayList<>();
+		
+		for(int i : list) {
+			
+			NayolaCore.getInstance().logSpigot(NayolaPerms.getInstance(), LogType.DEBUG, "looking for i = " + i);
+			PermGroup g = this.getGroupByPriority(i);
+			
+			NayolaCore.getInstance().logSpigot(NayolaPerms.getInstance(), LogType.DEBUG, "group is " + (g == null ? "null" : g.getName()));
+			
+			groups.add(g);
+			
+		}
+		
+		return groups;
+		
+	}
+	
 	public final PermGroup getGroupByID(@Nonnull int id) {
 		return this.getGroups().stream().filter(group -> group.getID() == id).findAny().orElse(null);
 	}
@@ -71,6 +101,10 @@ public class PermissionManager {
 	public final PermGroup getGroupByDisplayName(@Nonnull String name) {
 		return this.getGroups().stream().filter(group -> group.getDisplayName().equalsIgnoreCase(name)).findAny()
 				.orElse(null);
+	}
+	
+	public final PermGroup getGroupByPriority(@Nonnull int priority) {
+		return this.getGroups().stream().filter(group -> group.getPriority() == priority).findAny().orElse(null);
 	}
 
 	public Collection<PermPlayer> getPlayers() {
