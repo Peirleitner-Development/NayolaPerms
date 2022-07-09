@@ -169,11 +169,18 @@ public class NayolaPerms extends JavaPlugin {
 				+ "  &epermission &6add &f<Group> <Permission>\n" // 4
 				+ "  &epermission &6remove &f<Group> <Permission>\n" // 4
 				+ "  &eplayer &6get &f<Player>\n" // 3
-				+ "  &ereload"); 
-		languageManager.registerNewMessage(this, "command.nayolaperms.group.create.error.name-already-exists", "&cGroup with the name '&e{0}&c' does already exist&7.");
+				+ "  &ereload \n" // 1
+				+ "  &eloadDefaultGroups");  // 1
+		languageManager.registerNewMessage(this, "command.nayolaperms.group.create.error.name-already-exists", "&cGroup with the Name '&e{0}&c' does already exist&7.");
+		languageManager.registerNewMessage(this, "command.nayolaperms.group.create.error.diplayName-already-exists", "&cGroup with the DisplayName '&e{0}&c' does already exist&7.");
+		languageManager.registerNewMessage(this, "command.nayolaperms.group.create.error.icon-already-exists", "&cGroup with the Icon '&e{0}&c' does already exist&7.");
+		languageManager.registerNewMessage(this, "command.nayolaperms.group.create.error.hexColor-already-exists", "&cGroup with the HexColor '&e{0}&c' does already exist&7.");
+		languageManager.registerNewMessage(this, "command.nayolaperms.group.create.error.priority-already-exists", "&cGroup with the Priority '&e{0}&c' does already exist&7.");
+		languageManager.registerNewMessage(this, "command.nayolaperms.group.create.error.default-group-already-exists", "&cA default group '&e{0}&c' does already exist&7.");
 
 		// Listener
-		languageManager.registerNewMessage(this, "listener.join.error.could-not-create-player", "&cCould not create new player permission object; connection cancelled.");
+//		languageManager.registerNewMessage(this, "listener.async-player-pre-login.error.no-database-connection", "Could not validate connection towards the permission database.");
+		languageManager.registerNewMessage(this, "listener.async-player-pre-login.error.could-not-create-player", "&cCould not create new player permission object; connection cancelled.");
 
 		// Inventories
 

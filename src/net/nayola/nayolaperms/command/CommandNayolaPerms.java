@@ -35,7 +35,13 @@ public class CommandNayolaPerms implements CommandExecutor {
 			if (args[0].equalsIgnoreCase("reload")) {
 
 				NayolaPerms.getInstance().getPermissionManager().loadGroupsFromDatabase();
+				return true;
 
+			} else if(args[0].equalsIgnoreCase("loadDefaultGroups")) {
+				
+				NayolaPerms.getInstance().getPermissionManager().loadDefaultGroups(cs);
+				return true;
+				
 			} else {
 				this.sendHelp(cs);
 				return true;

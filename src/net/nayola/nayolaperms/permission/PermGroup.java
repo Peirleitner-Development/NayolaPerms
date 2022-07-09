@@ -1,5 +1,7 @@
 package net.nayola.nayolaperms.permission;
 
+import javax.annotation.Nonnull;
+
 import org.bukkit.Material;
 
 import net.md_5.bungee.api.ChatColor;
@@ -22,6 +24,15 @@ public class PermGroup {
 	private int priority;
 
 	public PermGroup() {
+	}
+	
+	public PermGroup(@Nonnull String name, @Nonnull String displayName, @Nonnull Material icon, @Nonnull String hexColor, @Nonnull boolean isDefault, @Nonnull int priority) {
+		this.name = name;
+		this.displayName = displayName;
+		this.icon = icon;
+		this.hexColor = hexColor;
+		this.isDefault = isDefault;
+		this.priority = priority;
 	}
 
 	public final int getID() {

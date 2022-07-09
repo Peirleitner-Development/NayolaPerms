@@ -1,0 +1,1 @@
+PermGroup: Add Category (STAFF, SPECIAL, PREMIUM, USER)

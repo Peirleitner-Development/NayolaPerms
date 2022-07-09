@@ -20,6 +20,11 @@ public class AsyncPlayerPreLoginListener implements Listener {
 	@EventHandler
 	public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
 
+		if(!NayolaPerms.getInstance().getMySQL().isConnected()) {
+			e.disallow(Result.KICK_OTHER, "Could not validate connection towards the permission database.");
+			return;
+		}
+		
 		NetworkUser user = NayolaCore.getInstance().getUserSystem().getUser(e.getUniqueId());
 
 		PermPlayer pp = NayolaPerms.getInstance().getPermissionManager().getPlayer(e.getUniqueId());
@@ -33,7 +38,7 @@ public class AsyncPlayerPreLoginListener implements Listener {
 			if (!NayolaPerms.getInstance().getPermissionManager().createPlayer(e.getUniqueId())) {
 
 				String result = NayolaCore.getInstance().getLanguageManagerSpigot().getMessage(
-						NayolaPerms.getInstance(), "listener.join.error.could-not-create-player", user.getLanguage(),
+						NayolaPerms.getInstance(), "listener.async-player-pre-login.error.could-not-create-player", user.getLanguage(),
 						null);
 				e.disallow(Result.KICK_OTHER, result);
 
