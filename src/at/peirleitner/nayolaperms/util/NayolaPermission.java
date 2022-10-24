@@ -1,4 +1,4 @@
-package net.nayola.nayolaperms.util;
+package at.peirleitner.nayolaperms.util;
 
 import javax.annotation.Nonnull;
 

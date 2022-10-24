@@ -1,4 +1,4 @@
-package net.nayola.nayolaperms.command;
+package at.peirleitner.nayolaperms.command;
 
 import java.util.Arrays;
 
@@ -9,10 +9,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import net.nayola.core.NayolaCore;
-import net.nayola.nayolaperms.NayolaPerms;
-import net.nayola.nayolaperms.permission.PermGroup;
-import net.nayola.nayolaperms.util.NayolaPermission;
+import at.peirleitner.core.Core;
+import at.peirleitner.nayolaperms.NayolaPerms;
+import at.peirleitner.nayolaperms.permission.PermGroup;
+import at.peirleitner.nayolaperms.util.NayolaPermission;
 
 public class CommandNayolaPerms implements CommandExecutor {
 
@@ -53,7 +53,7 @@ public class CommandNayolaPerms implements CommandExecutor {
 
 		} else if (args.length == 5) {
 
-		} else if (args.length == 8) {
+		} else if (args.length == 6) {
 
 			if (args[0].equalsIgnoreCase("group")) {
 
@@ -62,17 +62,13 @@ public class CommandNayolaPerms implements CommandExecutor {
 					try {
 
 						String name = args[2];
-						String displayName = args[3];
-						Material icon = Material.valueOf(args[4]);
-						String color = args[5];
-						boolean isDefault = Boolean.valueOf(args[6]);
-						int priority = Integer.valueOf(args[7]);
+						Material icon = Material.valueOf(args[3]);
+						boolean isDefault = Boolean.valueOf(args[4]);
+						int priority = Integer.valueOf(args[5]);
 
 						PermGroup group = new PermGroup();
 						group.setName(name);
-						group.setDisplayName(displayName);
 						group.setIcon(icon);
-						group.setHexColor(color);
 						group.setDefault(isDefault);
 						group.setPriority(priority);
 
@@ -105,7 +101,7 @@ public class CommandNayolaPerms implements CommandExecutor {
 	}
 
 	private final void sendHelp(@Nonnull CommandSender cs) {
-		NayolaCore.getInstance().getLanguageManagerSpigot().sendMessage(NayolaPerms.getInstance(), cs,
+		Core.getInstance().getLanguageManager().sendMessage( cs,NayolaPerms.getInstance().getPluginName(),
 				"command.nayolaperms.syntax", Arrays.asList(NayolaPerms.getInstance().getDescription().getVersion()),
 				true);
 	}

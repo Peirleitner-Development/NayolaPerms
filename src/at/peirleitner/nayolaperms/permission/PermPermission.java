@@ -1,4 +1,4 @@
-package net.nayola.nayolaperms.permission;
+package at.peirleitner.nayolaperms.permission;
 
 /**
  * This class represents a permission that belongs to a {@link PermGroup}.

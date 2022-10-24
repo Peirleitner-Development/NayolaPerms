@@ -1,12 +1,12 @@
-package net.nayola.nayolaperms.listener;
+package at.peirleitner.nayolaperms.listener;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import net.nayola.nayolaperms.NayolaPerms;
-import net.nayola.nayolaperms.permission.PermPlayer;
+import at.peirleitner.nayolaperms.NayolaPerms;
+import at.peirleitner.nayolaperms.permission.PermPlayer;
 
 public class PlayerQuitListener implements Listener {
 

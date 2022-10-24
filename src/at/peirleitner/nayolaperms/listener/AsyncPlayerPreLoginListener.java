@@ -1,15 +1,15 @@
-package net.nayola.nayolaperms.listener;
+package at.peirleitner.nayolaperms.listener;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 
-import net.nayola.core.NayolaCore;
-import net.nayola.core.util.LogType;
-import net.nayola.core.util.NetworkUser;
-import net.nayola.nayolaperms.NayolaPerms;
-import net.nayola.nayolaperms.permission.PermPlayer;
+import at.peirleitner.core.Core;
+import at.peirleitner.core.util.LogType;
+import at.peirleitner.core.util.user.User;
+import at.peirleitner.nayolaperms.NayolaPerms;
+import at.peirleitner.nayolaperms.permission.PermPlayer;
 
 public class AsyncPlayerPreLoginListener implements Listener {
 
@@ -20,26 +20,26 @@ public class AsyncPlayerPreLoginListener implements Listener {
 	@EventHandler
 	public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
 
-		if(!NayolaPerms.getInstance().getMySQL().isConnected()) {
+		if (NayolaPerms.getInstance().getMySQL() == null || !NayolaPerms.getInstance().getMySQL().isConnected()) {
 			e.disallow(Result.KICK_OTHER, "Could not validate connection towards the permission database.");
 			return;
 		}
-		
-		NetworkUser user = NayolaCore.getInstance().getUserSystem().getUser(e.getUniqueId());
+
+		User user = Core.getInstance().getUserSystem().getUser(e.getUniqueId());
 
 		PermPlayer pp = NayolaPerms.getInstance().getPermissionManager().getPlayer(e.getUniqueId());
 
 		if (pp != null && !NayolaPerms.getInstance().getPermissionManager().getPlayers().contains(pp)) {
 			NayolaPerms.getInstance().getPermissionManager().getPlayers().add(pp);
-			NayolaCore.getInstance().logSpigot(NayolaPerms.getInstance(), LogType.DEBUG,
+			Core.getInstance().log(this.getClass(), LogType.DEBUG,
 					"Cached Player on join: " + e.getUniqueId().toString());
 		} else {
 
 			if (!NayolaPerms.getInstance().getPermissionManager().createPlayer(e.getUniqueId())) {
 
-				String result = NayolaCore.getInstance().getLanguageManagerSpigot().getMessage(
-						NayolaPerms.getInstance(), "listener.async-player-pre-login.error.could-not-create-player", user.getLanguage(),
-						null);
+				String result = Core.getInstance().getLanguageManager().getMessage(
+						NayolaPerms.getInstance().getPluginName(), user.getLanguage(),
+						"listener.async-player-pre-login.error.could-not-create-player", null);
 				e.disallow(Result.KICK_OTHER, result);
 
 			}

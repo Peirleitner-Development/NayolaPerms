@@ -1,11 +1,11 @@
 name: NayolaPerms
 version: '${project.version}'
 author: Markus Peirleitner (Rengobli)
-website: [www.peirleitner.at, www.nayola.net]
+website: www.peirleitner.at
 api-version: 1.19
-depend: [NayolaCoreSpigot]
+depend: [LocalCore]
 
-main: net.nayola.nayolaperms.NayolaPerms
+main: at.peirleitner.nayolaperms.NayolaPerms
 
 commands:
   nayolaperms:

@@ -1,10 +1,14 @@
-package net.nayola.nayolaperms.permission;
+package at.peirleitner.nayolaperms.permission;
+
+import java.util.Collection;
 
 import javax.annotation.Nonnull;
 
 import org.bukkit.Material;
 
-import net.md_5.bungee.api.ChatColor;
+import at.peirleitner.core.Core;
+import at.peirleitner.core.util.local.Rank;
+import at.peirleitner.nayolaperms.NayolaPerms;
 
 /**
  * This class represents a permission group.
@@ -17,20 +21,16 @@ public class PermGroup {
 
 	private int id;
 	private String name;
-	private String displayName;
 	private Material icon;
-	private String hexColor;
 	private boolean isDefault;
 	private int priority;
 
 	public PermGroup() {
 	}
-	
-	public PermGroup(@Nonnull String name, @Nonnull String displayName, @Nonnull Material icon, @Nonnull String hexColor, @Nonnull boolean isDefault, @Nonnull int priority) {
+
+	public PermGroup(@Nonnull String name, @Nonnull Material icon, @Nonnull boolean isDefault, @Nonnull int priority) {
 		this.name = name;
-		this.displayName = displayName;
 		this.icon = icon;
-		this.hexColor = hexColor;
 		this.isDefault = isDefault;
 		this.priority = priority;
 	}
@@ -47,24 +47,8 @@ public class PermGroup {
 		return name;
 	}
 
-	public final String getColoredName() {
-		return this.getChatColor() + this.getName();
-	}
-
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getDisplayName() {
-		return displayName;
-	}
-
-	public final String getColoredDisplayName() {
-		return this.getChatColor() + this.getDisplayName();
-	}
-
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
 	}
 
 	public final Material getIcon() {
@@ -73,18 +57,6 @@ public class PermGroup {
 
 	public void setIcon(Material icon) {
 		this.icon = icon;
-	}
-
-	public final String getHexColor() {
-		return hexColor;
-	}
-
-	public void setHexColor(String hexColor) {
-		this.hexColor = hexColor;
-	}
-
-	public final ChatColor getChatColor() {
-		return ChatColor.of("#" + this.getHexColor());
 	}
 
 	public final boolean isDefault() {
@@ -101,6 +73,21 @@ public class PermGroup {
 
 	public void setPriority(int priority) {
 		this.priority = priority;
+	}
+
+	public final Collection<PermPermission> getPermissions() {
+		return NayolaPerms.getInstance().getPermissionManager().getPermissions(this);
+	}
+	
+	/**
+	 * 
+	 * @return {@link Rank} equivalent of this group.
+	 * @since 1.0.0
+	 * @author Markus Peirleitner (Rengobli)
+	 * @apiNote This does only work if {@link Rank#getPriority()} and {@link #getPriority()} are equal.
+ 	 */
+	public final Rank getRank() {
+		return Core.getInstance().getRankByPriority(this.getPriority());
 	}
 
 }

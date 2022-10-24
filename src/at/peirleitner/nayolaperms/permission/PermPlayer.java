@@ -1,9 +1,9 @@
-package net.nayola.nayolaperms.permission;
+package at.peirleitner.nayolaperms.permission;
 
 import java.util.UUID;
 
-import net.nayola.core.NayolaCore;
-import net.nayola.nayolaperms.NayolaPerms;
+import at.peirleitner.core.util.GlobalUtils;
+import at.peirleitner.nayolaperms.NayolaPerms;
 
 /**
  * This class represents a player on the server
@@ -71,15 +71,15 @@ public class PermPlayer {
 	public final long getExpire() {
 		return expire;
 	}
-	
+
 	public final String getExpireDateAsString() {
-		return NayolaCore.getInstance().getUtilManager().getDate(this.getExpire());
+		return GlobalUtils.getFormatedDate(this.getExpire());
 	}
 
 	public final boolean isSetToExpire() {
 		return this.getExpire() != -1;
 	}
-	
+
 	public void setExpire(long expire) {
 		this.expire = expire;
 	}

@@ -1,4 +1,4 @@
-package net.nayola.nayolaperms.command;
+package at.peirleitner.nayolaperms.command;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,9 +7,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import net.nayola.core.NayolaCore;
-import net.nayola.nayolaperms.NayolaPerms;
-import net.nayola.nayolaperms.permission.PermGroup;
+import at.peirleitner.core.Core;
+import at.peirleitner.nayolaperms.NayolaPerms;
+import at.peirleitner.nayolaperms.permission.PermGroup;
 
 public class CommandGroups implements CommandExecutor {
 
@@ -20,7 +20,7 @@ public class CommandGroups implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender cs, Command cmd, String arg, String[] args) {
 
-		NayolaCore.getInstance().getLanguageManagerSpigot().sendMessage(NayolaPerms.getInstance(), cs,
+		Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
 				"command.groups.list", null, true);
 
 		Collection<PermGroup> groups = NayolaPerms.getInstance().getPermissionManager().getGroupsInOrder();
@@ -28,8 +28,8 @@ public class CommandGroups implements CommandExecutor {
 		if (!groups.isEmpty()) {
 
 			groups.forEach(group -> {
-				NayolaCore.getInstance().getLanguageManagerSpigot().sendMessage(NayolaPerms.getInstance(), cs,
-						"command.groups.group", Arrays.asList(group.getColoredName()), true);
+				Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+						"command.groups.group", Arrays.asList(group.getName()), true);
 			});
 
 		}
