@@ -1,5 +1,6 @@
 package at.peirleitner.nayolaperms.permission;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.annotation.Nonnull;
@@ -7,8 +8,9 @@ import javax.annotation.Nonnull;
 import org.bukkit.Material;
 
 import at.peirleitner.core.Core;
-import at.peirleitner.core.util.local.Rank;
+import at.peirleitner.core.util.user.Rank;
 import at.peirleitner.nayolaperms.NayolaPerms;
+import net.md_5.bungee.api.ChatColor;
 
 /**
  * This class represents a permission group.
@@ -46,6 +48,10 @@ public class PermGroup {
 	public final String getName() {
 		return name;
 	}
+	
+	public String getDisplayName() {
+		return ChatColor.of(this.getRank().getColor()) + this.getName();
+	}
 
 	public void setName(String name) {
 		this.name = name;
@@ -79,6 +85,23 @@ public class PermGroup {
 		return NayolaPerms.getInstance().getPermissionManager().getPermissions(this);
 	}
 	
+	public final boolean hasPermission(@Nonnull String permission) {
+		return this.getPermissions().stream().filter(perm -> perm.getPermission().equalsIgnoreCase(permission)).findAny().orElse(null) == null ? false : true;
+	}
+	
+	public final Collection<PermPlayer> getPlayers() {
+		
+		Collection<PermPlayer> players = new ArrayList<>();
+		
+		for(PermPlayer pp : NayolaPerms.getInstance().getPermissionManager().getPlayers()) {
+			if(pp.getGroupID() == this.getID()) {
+				players.add(pp);
+			}
+		}
+		
+		return players;
+	}
+	
 	/**
 	 * 
 	 * @return {@link Rank} equivalent of this group.
@@ -88,6 +111,11 @@ public class PermGroup {
  	 */
 	public final Rank getRank() {
 		return Core.getInstance().getRankByPriority(this.getPriority());
+	}
+	
+	@Override
+	public String toString() {
+		return "PermGroup[id=" + this.getID() + ",name=" + this.getName() + ",icon=" + this.getIcon().toString() + ",isDefault=" + this.isDefault() + ",priority=" + this.getPriority() + "]";
 	}
 
 }

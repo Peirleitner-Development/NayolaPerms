@@ -29,7 +29,7 @@ public class CommandGroups implements CommandExecutor {
 
 			groups.forEach(group -> {
 				Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
-						"command.groups.group", Arrays.asList(group.getName()), true);
+						"command.groups.group", Arrays.asList(group.getDisplayName()), true);
 			});
 
 		}

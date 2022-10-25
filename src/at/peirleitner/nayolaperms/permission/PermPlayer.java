@@ -1,6 +1,9 @@
 package at.peirleitner.nayolaperms.permission;
 
+import java.util.Collection;
 import java.util.UUID;
+
+import javax.annotation.Nonnull;
 
 import at.peirleitner.core.util.GlobalUtils;
 import at.peirleitner.nayolaperms.NayolaPerms;
@@ -82,6 +85,20 @@ public class PermPlayer {
 
 	public void setExpire(long expire) {
 		this.expire = expire;
+	}
+
+	public Collection<PermPermission> getPermissions() {
+		return this.getGroup().getPermissions();
+	}
+	
+	public final boolean hasPermission(@Nonnull String perm) {
+		return NayolaPerms.getInstance().getPermissionManager().hasPermission(this.getGroup(), perm);
+	}
+
+	@Override
+	public String toString() {
+		return "PermPlayer[uuid=" + this.getUUID().toString() + ",groupID=" + this.getGroupID() + ",expire="
+				+ this.getExpire() + "]";
 	}
 
 }

@@ -6,7 +6,6 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 
 import at.peirleitner.core.Core;
-import at.peirleitner.core.util.LogType;
 import at.peirleitner.core.util.user.User;
 import at.peirleitner.nayolaperms.NayolaPerms;
 import at.peirleitner.nayolaperms.permission.PermPlayer;
@@ -26,14 +25,9 @@ public class AsyncPlayerPreLoginListener implements Listener {
 		}
 
 		User user = Core.getInstance().getUserSystem().getUser(e.getUniqueId());
-
 		PermPlayer pp = NayolaPerms.getInstance().getPermissionManager().getPlayer(e.getUniqueId());
 
-		if (pp != null && !NayolaPerms.getInstance().getPermissionManager().getPlayers().contains(pp)) {
-			NayolaPerms.getInstance().getPermissionManager().getPlayers().add(pp);
-			Core.getInstance().log(this.getClass(), LogType.DEBUG,
-					"Cached Player on join: " + e.getUniqueId().toString());
-		} else {
+		if (pp == null) {
 
 			if (!NayolaPerms.getInstance().getPermissionManager().createPlayer(e.getUniqueId())) {
 
@@ -44,6 +38,10 @@ public class AsyncPlayerPreLoginListener implements Listener {
 
 			}
 
+		}
+
+		if (!NayolaPerms.getInstance().getPermissionManager().getPlayers().contains(pp)) {
+			NayolaPerms.getInstance().getPermissionManager().getPlayers().add(pp);
 		}
 
 	}

@@ -1,5 +1,7 @@
 package at.peirleitner.nayolaperms.permission;
 
+import at.peirleitner.nayolaperms.NayolaPerms;
+
 /**
  * This class represents a permission that belongs to a {@link PermGroup}.
  * 
@@ -50,7 +52,7 @@ public class PermPermission {
 	 * @author Markus Peirleitner (Rengobli)
 	 */
 	public final PermGroup getGroup() {
-		return null;
+		return NayolaPerms.getInstance().getPermissionManager().getGroupByID(this.getGroupID());
 	}
 
 	public void setGroupID(int groupID) {
@@ -63,6 +65,11 @@ public class PermPermission {
 
 	public void setServerID(int serverID) {
 		this.serverID = serverID;
+	}
+	
+	@Override
+	public String toString() {
+		return "PermPermission[permission=" + this.getPermission() + ",groupID=" + this.getGroupID() + ",saveType=" + this.getServerID() + "]";
 	}
 
 }

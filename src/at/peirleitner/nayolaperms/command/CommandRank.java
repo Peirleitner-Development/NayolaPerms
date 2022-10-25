@@ -34,10 +34,10 @@ public class CommandRank implements CommandExecutor {
 
 		if (pp.isSetToExpire()) {
 			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
-					"command.rank.temporary", Arrays.asList(group.getName(), pp.getExpireDateAsString()), true);
+					"command.rank.temporary", Arrays.asList(group.getDisplayName(), pp.getExpireDateAsString()), true);
 		} else {
 			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
-					"command.rank.permanent", Arrays.asList(group.getName()), true);
+					"command.rank.permanent", Arrays.asList(group.getDisplayName()), true);
 		}
 
 		return true;

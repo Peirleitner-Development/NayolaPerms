@@ -6,6 +6,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import at.peirleitner.core.Core;
@@ -18,6 +21,7 @@ import at.peirleitner.nayolaperms.command.CommandGroups;
 import at.peirleitner.nayolaperms.command.CommandNayolaPerms;
 import at.peirleitner.nayolaperms.command.CommandRank;
 import at.peirleitner.nayolaperms.listener.AsyncPlayerPreLoginListener;
+import at.peirleitner.nayolaperms.listener.PlayerJoinListener;
 import at.peirleitner.nayolaperms.listener.PlayerQuitListener;
 import at.peirleitner.nayolaperms.manager.PermissionManager;
 
@@ -63,6 +67,7 @@ public class NayolaPerms extends JavaPlugin {
 		// Listener
 		new AsyncPlayerPreLoginListener();
 		new PlayerQuitListener();
+		new PlayerJoinListener();
 
 	}
 
@@ -71,6 +76,19 @@ public class NayolaPerms extends JavaPlugin {
 		if (this.mysql != null && this.mysql.isConnected()) {
 			this.mysql.close();
 		}
+		
+		for(Player all : Bukkit.getOnlinePlayers()) {
+			
+			PermissionAttachment attachment = this.getPermissionManager().getAttachments().get(all.getUniqueId());
+			
+			if(attachment == null) {
+				continue;
+			}
+			
+			all.removeAttachment(attachment);
+			
+		}
+		
 	}
 
 	public static NayolaPerms getInstance() {
@@ -95,6 +113,7 @@ public class NayolaPerms extends JavaPlugin {
 		// v1.0.0
 		Core.getInstance().getSettingsManager().registerSetting(this.getPluginName(), "mysql.table-prefix", "permissions_");
 		Core.getInstance().getSettingsManager().registerSetting(this.getPluginName(), "enable-caching", "true");
+		Core.getInstance().getSettingsManager().registerSetting(this.getPluginName(), "send-rank-info-on-join", "true");
 
 	}
 	
@@ -116,6 +135,7 @@ public class NayolaPerms extends JavaPlugin {
 		languageManager.registerNewMessage(pluginName, "command.rank.temporary", "&3Your current rank &e{0} &3expires on &e{1}&7.");
 		languageManager.registerNewMessage(pluginName, "command.groups.list", "&3The following groups are available&8:");
 		languageManager.registerNewMessage(pluginName, "command.groups.group", "&8- &e{0}");
+		
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.syntax", "&3Help for NayolaPerms version &e{0}&8:\n"
 				+ "&3/nayolaperms\n"
 				+ "  &egroup &6create &f<Name> <Icon> <Default> <Priority>\n" // 6
@@ -127,13 +147,18 @@ public class NayolaPerms extends JavaPlugin {
 				+ "  &eplayer &6get &f<Player>\n" // 3
 				+ "  &ereload \n" // 1
 				+ "  &eloadDefaultGroups");  // 1
+		
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.main.error.group-does-not-exist", "&cGroup with ID &e{0} &cdoes not exist.");
+		
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.name-already-exists", "&cGroup with the Name '&e{0}&c' does already exist&7.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.diplayName-already-exists", "&cGroup with the DisplayName '&e{0}&c' does already exist&7.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.icon-already-exists", "&cGroup with the Icon '&e{0}&c' does already exist&7.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.hexColor-already-exists", "&cGroup with the HexColor '&e{0}&c' does already exist&7.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.priority-already-exists", "&cGroup with the Priority '&e{0}&c' does already exist&7.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.default-group-already-exists", "&cA default group '&e{0}&c' does already exist&7.");
-
+		
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.add.error.already-has-permission", "&cThe group &e{0} &cdoes already have the permission &e{1} &cbased on group &e{2}&c.");
+		
 		// Listener
 //		languageManager.registerNewMessage(pluginName, "listener.async-player-pre-login.error.no-database-connection", "Could not validate connection towards the permission database.");
 		languageManager.registerNewMessage(pluginName, "listener.async-player-pre-login.error.could-not-create-player", "&cCould not create new player permission object; connection cancelled.");

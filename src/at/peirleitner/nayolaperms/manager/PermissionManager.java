@@ -8,13 +8,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachment;
 
 import at.peirleitner.core.Core;
 import at.peirleitner.core.util.LogType;
@@ -28,6 +32,7 @@ public class PermissionManager {
 	private Collection<PermGroup> groups;
 	private Collection<PermPlayer> players;
 	private Collection<PermPermission> permissions;
+	private HashMap<UUID, PermissionAttachment> attachments;
 
 	public PermissionManager() {
 
@@ -35,12 +40,17 @@ public class PermissionManager {
 		this.groups = new ArrayList<>();
 		this.players = new ArrayList<>();
 		this.permissions = new ArrayList<>();
+		this.attachments = new HashMap<>();
 
 		// Load Data
-		this.loadGroupsFromDatabase();
+		this.reload();
 
 	}
 
+	public HashMap<UUID, PermissionAttachment> getAttachments() {
+		return this.attachments;
+	}
+	
 	public Collection<PermGroup> getGroups() {
 		return groups;
 	}
@@ -54,6 +64,34 @@ public class PermissionManager {
 		}
 
 		Collections.sort(list, Collections.reverseOrder());
+
+		List<PermGroup> groups = new ArrayList<>();
+
+		for (int i : list) {
+
+//			Core.getInstance().log(this.getClass(), LogType.DEBUG, "looking for i = " + i);
+			PermGroup g = this.getGroupByPriority(i);
+
+//			Core.getInstance().log(this.getClass(), LogType.DEBUG,
+//					"group is " + (g == null ? "null" : g.getName()));
+
+			groups.add(g);
+
+		}
+
+		return groups;
+
+	}
+
+	public List<PermGroup> getGroupsInReverseOrder() {
+
+		List<Integer> list = new ArrayList<>();
+
+		for (PermGroup group : this.getGroups()) {
+			list.add(group.getPriority());
+		}
+
+		Collections.sort(list);
 
 		List<PermGroup> groups = new ArrayList<>();
 
@@ -133,8 +171,8 @@ public class PermissionManager {
 				return pp;
 
 			} else {
-				Core.getInstance().log(this.getClass(), LogType.DEBUG,
-						"Could not get PermPlayer by UUID '" + uuid.toString() + "' from Database: None found.");
+//				Core.getInstance().log(this.getClass(), LogType.DEBUG,
+//						"Could not get PermPlayer by UUID '" + uuid.toString() + "' from Database: None found.");
 				return null;
 			}
 
@@ -156,15 +194,21 @@ public class PermissionManager {
 			return false;
 		}
 
+		PermPlayer pp = new PermPlayer(uuid, defaultGroup.getID(), -1);
+
 		try {
 
 			PreparedStatement stmt = NayolaPerms.getInstance().getMySQL().getConnection().prepareStatement(
 					"INSERT INTO " + NayolaPerms.table_players + " (uuid, groupID, expire) VALUES (?, ?, ?);");
-			stmt.setString(1, uuid.toString());
-			stmt.setInt(2, defaultGroup.getID());
-			stmt.setLong(3, -1);
+			stmt.setString(1, pp.getUUID().toString());
+			stmt.setInt(2, pp.getGroupID());
+			stmt.setLong(3, pp.getExpire());
 
-			stmt.execute();
+			stmt.executeUpdate();
+
+			if (NayolaPerms.getInstance().isCachingEnabled()) {
+				this.getPlayers().add(pp);
+			}
 
 			Core.getInstance().log(this.getClass(), LogType.DEBUG, "Created Player '" + uuid.toString() + "'.");
 			return true;
@@ -177,7 +221,7 @@ public class PermissionManager {
 
 	}
 
-	public final PermGroup getGroupByResultSet(@Nonnull ResultSet rs) throws SQLException {
+	private final PermGroup getGroupByResultSet(@Nonnull ResultSet rs) throws SQLException {
 
 		int id = rs.getInt(1);
 		String name = rs.getString(2);
@@ -196,13 +240,231 @@ public class PermissionManager {
 
 	}
 
-	public final void loadGroupsFromDatabase() {
+	private final PermPlayer getPlayerByResultSet(@Nonnull ResultSet rs) throws SQLException {
 
-		if(!NayolaPerms.getInstance().getMySQL().isConnected()) {
-			Core.getInstance().log(getClass(), LogType.DEBUG, "Not loading groups from Database because no connection has been established.");
-			return;
+		UUID uuid = UUID.fromString(rs.getString(1));
+		int groupID = rs.getInt(2);
+		long expire = rs.getLong(3);
+
+		return new PermPlayer(uuid, groupID, expire);
+	}
+
+	private final PermPermission getPermissionByResultSet(@Nonnull ResultSet rs) throws SQLException {
+
+		String permission = rs.getString(1);
+		int groupID = rs.getInt(2);
+		int saveType = rs.getInt(3);
+
+		return new PermPermission(permission, groupID, saveType);
+	}
+
+	public final void reload() {
+		this.loadGroupsFromDatabase();
+		this.loadPermissionsFromDatabase();
+		this.loadPlayersFromDatabase();
+		
+		for(Player all : Bukkit.getOnlinePlayers()) {
+			this.reloadPermissions(all);
 		}
 		
+	}
+
+	public final void loadPermissionsFromDatabase() {
+
+		if (!NayolaPerms.getInstance().getMySQL().isConnected()) {
+			Core.getInstance().log(getClass(), LogType.DEBUG,
+					"Not loading permissions from Database because no connection has been established.");
+			return;
+		}
+
+		Core.getInstance().log(this.getClass(), LogType.INFO, "Loading Permissions from Database..");
+		this.getPermissions().clear();
+
+		try {
+
+			PreparedStatement stmt = NayolaPerms.getInstance().getMySQL().getConnection()
+					.prepareStatement("SELECT * FROM " + NayolaPerms.table_permissions + " WHERE saveType = ?");
+			stmt.setInt(1, Core.getInstance().getSettingsManager().getSaveType().getID());
+			ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+
+				PermPermission pp = this.getPermissionByResultSet(rs);
+
+				if (pp != null) {
+					this.getPermissions().add(pp);
+				}
+
+			}
+
+			Core.getInstance().log(this.getClass(), LogType.INFO,
+					"Loaded " + this.getPermissions().size() + " Permissions from Database.");
+
+		} catch (SQLException e) {
+			Core.getInstance().log(this.getClass(), LogType.ERROR,
+					"Could not load permissions from database/SQL: " + e.getMessage());
+		}
+
+	}
+
+	public final boolean hasPermission(@Nonnull PermGroup group, @Nonnull String permission) {
+
+		PermGroup least = this.getLeastPriorityGroupWithPermission(permission);
+		
+		
+		if (least != null) {
+			
+//			Core.getInstance().log(getClass(), LogType.DEBUG, "Permission " + permission + " requires the group " + least.getName() + " (P: " + least.getPriority() + "). Entered group: " + group.getName() + "(P: " + group.getPriority() + ").");
+			
+			if (group.getPriority() < least.getPriority()) {
+//				Core.getInstance().log(getClass(), LogType.DEBUG, "Group " + least.toString() + " has permission "
+//						+ permission + " at least priority. Entered group higher: NO");
+				return false;
+			} else {
+//				Core.getInstance().log(getClass(), LogType.DEBUG, "Group " + least.toString() + " has permission "
+//						+ permission + " at least priority. Entered group higher: YES");
+				return true;
+			}
+		} else {
+			Core.getInstance().log(getClass(), LogType.DEBUG,
+					"Permission " + permission + " is not saved in any saveType.");
+			return false;
+		}
+
+	}
+
+	public final PermGroup getLeastPriorityGroupWithPermission(@Nonnull String permission) {
+
+		for (PermGroup pg : this.getGroupsInReverseOrder()) {
+
+//			Core.getInstance().log(getClass(), LogType.DEBUG,
+//					"Checking group " + pg.toString() + " for 'getLeastPriorityGroupWithPermission'..");
+
+			if (pg.hasPermission(permission)) {
+//				Core.getInstance().log(getClass(), LogType.DEBUG, "GROUP " + pg.getName() + " HAS PERMISSION " + permission);
+				return pg;
+			}
+
+		}
+
+		return null;
+	}
+	
+	public final boolean reloadPermissions(@Nonnull Player p) {
+		
+		PermPlayer pp = this.getPlayer(p.getUniqueId());
+		
+		if(pp == null) {
+			// null
+			return false;
+		}
+		
+		if(this.getAttachments().get(p.getUniqueId()) != null) {
+			p.removeAttachment(this.getAttachments().get(p.getUniqueId()));
+			this.getAttachments().remove(p.getUniqueId(), this.getAttachments().get(p.getUniqueId()));
+		}
+		
+		PermissionAttachment attachment = p.addAttachment(NayolaPerms.getInstance());
+		this.getAttachments().put(p.getUniqueId(), attachment);
+		
+		for(PermPermission permissions : this.getPermissionsFromAllGroups(pp.getGroup())) {
+			attachment.setPermission(permissions.getPermission(), true);
+		}
+		
+		return true;
+	}
+
+	public final boolean addPermission(@Nonnull CommandSender cs, @Nonnull int groupID, @Nonnull String permission) {
+
+		PermGroup group = this.getGroupByID(groupID);
+
+		if (group == null) {
+			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+					"command.nayolaperms.main.error.group-does-not-exist", Arrays.asList("" + groupID), true);
+			return false;
+		}
+
+		if (this.hasPermission(group, permission)) {
+			PermGroup lp = this.getLeastPriorityGroupWithPermission(permission);
+			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+					"command.nayolaperms.permission.add.error.already-has-permission",
+					Arrays.asList(group.getName(), permission, lp.getName()), true);
+			return false;
+		}
+
+		PermPermission pp = new PermPermission(permission, groupID,
+				Core.getInstance().getSettingsManager().getSaveType().getID());
+
+		try {
+
+			PreparedStatement stmt = NayolaPerms.getInstance().getMySQL().getConnection()
+					.prepareStatement("INSERT INTO " + NayolaPerms.table_permissions
+							+ " (permission, groupID, saveType) VALUES (?, ?, ?);");
+			stmt.setString(1, pp.getPermission());
+			stmt.setInt(2, pp.getGroupID());
+			stmt.setInt(3, pp.getServerID());
+
+			stmt.executeUpdate();
+
+			if (NayolaPerms.getInstance().isCachingEnabled()) {
+				this.getPermissions().add(pp);
+			}
+
+			return true;
+
+		} catch (SQLException e) {
+			Core.getInstance().log(getClass(), LogType.ERROR, "Could not add permission '" + permission + "' to group '"
+					+ group.toString() + "'/SQL: " + e.getMessage());
+			return false;
+		}
+
+	}
+
+	public final void loadPlayersFromDatabase() {
+
+		if (!NayolaPerms.getInstance().getMySQL().isConnected()) {
+			Core.getInstance().log(getClass(), LogType.DEBUG,
+					"Not loading players from Database because no connection has been established.");
+			return;
+		}
+
+		Core.getInstance().log(this.getClass(), LogType.INFO, "Loading Players from Database..");
+		this.getPlayers().clear();
+
+		try {
+
+			PreparedStatement stmt = NayolaPerms.getInstance().getMySQL().getConnection()
+					.prepareStatement("SELECT * FROM " + NayolaPerms.table_players);
+			ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+
+				PermPlayer pp = this.getPlayerByResultSet(rs);
+
+				if (pp != null) {
+					this.getPlayers().add(pp);
+				}
+
+			}
+
+			Core.getInstance().log(this.getClass(), LogType.INFO,
+					"Loaded " + this.getPlayers().size() + " Players from Database.");
+
+		} catch (SQLException e) {
+			Core.getInstance().log(this.getClass(), LogType.ERROR,
+					"Could not load players from database/SQL: " + e.getMessage());
+		}
+
+	}
+
+	public final void loadGroupsFromDatabase() {
+
+		if (!NayolaPerms.getInstance().getMySQL().isConnected()) {
+			Core.getInstance().log(getClass(), LogType.DEBUG,
+					"Not loading groups from Database because no connection has been established.");
+			return;
+		}
+
 		Core.getInstance().log(this.getClass(), LogType.INFO, "Loading Groups from Database..");
 		this.getGroups().clear();
 
@@ -251,24 +513,24 @@ public class PermissionManager {
 		// Add Groups
 		// Staff
 		groups.add(new PermGroup("Owner", Material.NETHERITE_PICKAXE, false, 490));
-		groups.add(new PermGroup("Leadership",  Material.DIAMOND_PICKAXE, false, 480));
-		groups.add(new PermGroup("Admin",Material.DIAMOND_CHESTPLATE, false, 470));
+		groups.add(new PermGroup("Leadership", Material.DIAMOND_PICKAXE, false, 480));
+		groups.add(new PermGroup("Administrator", Material.DIAMOND_CHESTPLATE, false, 470));
 		groups.add(new PermGroup("Developer", Material.LAVA_BUCKET, false, 460));
 		groups.add(new PermGroup("Content", Material.WRITABLE_BOOK, false, 450));
 		groups.add(new PermGroup("Builder", Material.GOLDEN_AXE, false, 440));
 		groups.add(new PermGroup("Moderator", Material.GOLDEN_SWORD, false, 430));
 		groups.add(new PermGroup("Supporter", Material.STONE_SWORD, false, 420));
-		groups.add(new PermGroup("Trainee", Material.WOODEN_SHOVEL,  false, 410));
+		groups.add(new PermGroup("Trainee", Material.WOODEN_SHOVEL, false, 410));
 		// Special
 		groups.add(new PermGroup("VIP", Material.SHULKER_SHELL, false, 310));
 		// Premium
-		groups.add(new PermGroup("Emerald",  Material.EMERALD, false, 230));
-		groups.add(new PermGroup("Diamond",  Material.DIAMOND, false, 220));
-		groups.add(new PermGroup("Gold",  Material.RAW_GOLD,false, 210));
+		groups.add(new PermGroup("Emerald", Material.EMERALD, false, 230));
+		groups.add(new PermGroup("Diamond", Material.DIAMOND, false, 220));
+		groups.add(new PermGroup("Gold", Material.RAW_GOLD, false, 210));
 		// User
-		groups.add(new PermGroup("Iron",  Material.RAW_IRON, false, 130));
-		groups.add(new PermGroup("Coal",  Material.COAL,false, 120));
-		groups.add(new PermGroup("Stone",  Material.STONE,  true, 110));
+		groups.add(new PermGroup("Iron", Material.RAW_IRON, false, 130));
+		groups.add(new PermGroup("Coal", Material.COAL, false, 120));
+		groups.add(new PermGroup("Stone", Material.STONE, true, 110));
 
 		// Create Groups
 		for (PermGroup group : groups) {
@@ -317,9 +579,10 @@ public class PermissionManager {
 
 		try {
 
-			PreparedStatement stmt = NayolaPerms.getInstance().getMySQL().getConnection()
-					.prepareStatement("INSERT INTO " + NayolaPerms.table_groups
-							+ " (name, icon, isDefault, priority) VALUES (?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
+			PreparedStatement stmt = NayolaPerms.getInstance().getMySQL().getConnection().prepareStatement(
+					"INSERT INTO " + NayolaPerms.table_groups
+							+ " (name, icon, isDefault, priority) VALUES (?, ?, ?, ?);",
+					Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, group.getName());
 			stmt.setString(2, group.getIcon().toString());
 			stmt.setBoolean(3, group.isDefault());
@@ -355,16 +618,47 @@ public class PermissionManager {
 		return permissions;
 	}
 
+//	public final Collection<PermPermission> getPermissions(@Nonnull PermGroup group) {
+//
+//		Collection<PermPermission> permList = new ArrayList<>();
+//
+//		for (PermPermission permission : this.getPermissions()) {
+//			
+//			PermGroup pg = permission.getGroup();
+//			int permGroupPriority = pg.getPriority();
+//			int groupPriority = permGroupPriority;
+//			
+//			if (permGroupPriority <= groupPriority) {
+//				permList.add(permission);
+//			}
+//		}
+//
+//		return permList;
+//	}
+	
 	public final Collection<PermPermission> getPermissions(@Nonnull PermGroup group) {
-
+		
 		Collection<PermPermission> permList = new ArrayList<>();
-
-		this.getPermissions().forEach(permission -> {
-			if (permission.getGroupID() == group.getID()) {
+		
+		for(PermPermission permission : this.getPermissions()) {
+			if(permission.getGroup().getID() == group.getID()) {
 				permList.add(permission);
 			}
-		});
-
+		}
+		
+		return permList;
+	}
+	
+	public final Collection<PermPermission> getPermissionsFromAllGroups(@Nonnull PermGroup group) {
+		
+		Collection<PermPermission> permList = new ArrayList<>();
+		
+		for(PermPermission permission : this.getPermissions()) {
+			if(permission.getGroup().getPriority() <= group.getPriority()) {
+				permList.add(permission);
+			}
+		}
+		
 		return permList;
 	}
 
