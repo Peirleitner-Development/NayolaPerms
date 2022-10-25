@@ -11,6 +11,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import at.peirleitner.core.Core;
+import at.peirleitner.core.util.user.PredefinedMessage;
+import at.peirleitner.core.util.user.User;
 import at.peirleitner.nayolaperms.NayolaPerms;
 import at.peirleitner.nayolaperms.manager.PermissionManager;
 import at.peirleitner.nayolaperms.permission.PermGroup;
@@ -28,20 +30,21 @@ public class CommandNayolaPerms implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender cs, Command cmd, String arg, String[] args) {
 
-		if(cs instanceof Player && args.length == 0) {
-			
+		if (cs instanceof Player && args.length == 0) {
+
 			Player p = (Player) cs;
 			PermPlayer pp = this.getPermissionManager().getPlayer(p.getUniqueId());
-			
-			for(PermPermission perm : this.getPermissionManager().getPermissions()) {
-				cs.sendMessage((pp.hasPermission(perm.getPermission()) ? ChatColor.GREEN : ChatColor.RED) + "(" + perm.getGroup().getName() + "): " + perm.getPermission());
+
+			for (PermPermission perm : this.getPermissionManager().getPermissions()) {
+				cs.sendMessage((pp.hasPermission(perm.getPermission()) ? ChatColor.GREEN : ChatColor.RED) + "("
+						+ perm.getGroup().getName() + "): " + perm.getPermission());
 			}
-			
+
 			return true;
 		}
-		
+
 		if (!cs.hasPermission(NayolaPermission.COMMAND_NAYOLA_PERMS_USE.getPermission())) {
-			cs.sendMessage("no perm");
+			cs.sendMessage(Core.getInstance().getLanguageManager().getMessage(PredefinedMessage.NO_PERMISSION));
 			return true;
 		}
 
@@ -69,6 +72,31 @@ public class CommandNayolaPerms implements CommandExecutor {
 			if (args[0].equalsIgnoreCase("group")) {
 
 				if (args[1].equalsIgnoreCase("get")) {
+
+					User target = Core.getInstance().getUserSystem().getByLastKnownName(args[2]);
+
+					if (target == null) {
+						cs.sendMessage(
+								Core.getInstance().getLanguageManager().getMessage(PredefinedMessage.NOT_REGISTERED));
+						return true;
+					}
+
+					PermPlayer pp = this.getPermissionManager().getPlayer(target.getUUID());
+
+					if (pp == null) {
+						Core.getInstance().getLanguageManager().sendMessage(cs,
+								NayolaPerms.getInstance().getPluginName(),
+								"command.nayolaperms.main.error.player-has-no-profile",
+								Arrays.asList(target.getDisplayName()), true);
+						return true;
+					}
+
+					PermGroup pg = pp.getGroup();
+
+					Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+							"command.nayolaperms.group.get.success",
+							Arrays.asList(target.getDisplayName(), pg.getDisplayName()), true);
+					return true;
 
 				} else {
 					this.sendHelp(cs);
@@ -99,39 +127,39 @@ public class CommandNayolaPerms implements CommandExecutor {
 			}
 
 		} else if (args.length == 4) {
-			
-			if(args[0].equalsIgnoreCase("group")) {
-				
-				if(args[1].equalsIgnoreCase("set")) {
-					
+
+			if (args[0].equalsIgnoreCase("group")) {
+
+				if (args[1].equalsIgnoreCase("set")) {
+
 				} else {
 					this.sendHelp(cs);
 					return true;
 				}
-				
-			} else if(args[0].equalsIgnoreCase("permission")) {
-				
-				if(args[1].equalsIgnoreCase("add")) {
-					
+
+			} else if (args[0].equalsIgnoreCase("permission")) {
+
+				if (args[1].equalsIgnoreCase("add")) {
+
 					// Command: /np permission add <Group> <Perm>
 					int groupID = Integer.valueOf(args[2]);
 					String permission = args[3];
-					
+
 					this.getPermissionManager().addPermission(cs, groupID, permission);
 					return true;
-					
-				} else if(args[1].equalsIgnoreCase("remove")) {
-					
+
+				} else if (args[1].equalsIgnoreCase("remove")) {
+
 				} else {
 					this.sendHelp(cs);
 					return true;
 				}
-				
+
 			} else {
 				this.sendHelp(cs);
 				return true;
 			}
-			
+
 		} else if (args.length == 5) {
 
 		} else if (args.length == 6) {
@@ -163,10 +191,8 @@ public class CommandNayolaPerms implements CommandExecutor {
 
 					return true;
 
-				} else if(args[1].equalsIgnoreCase("set")) {
-					
-					
-					
+				} else if (args[1].equalsIgnoreCase("set")) {
+
 				} else {
 					this.sendHelp(cs);
 					return true;
@@ -190,7 +216,7 @@ public class CommandNayolaPerms implements CommandExecutor {
 				"command.nayolaperms.syntax", Arrays.asList(NayolaPerms.getInstance().getDescription().getVersion()),
 				true);
 	}
-	
+
 	private final PermissionManager getPermissionManager() {
 		return NayolaPerms.getInstance().getPermissionManager();
 	}

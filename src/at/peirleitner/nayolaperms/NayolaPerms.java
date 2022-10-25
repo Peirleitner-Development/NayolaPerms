@@ -149,6 +149,9 @@ public class NayolaPerms extends JavaPlugin {
 				+ "  &eloadDefaultGroups");  // 1
 		
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.main.error.group-does-not-exist", "&cGroup with ID &e{0} &cdoes not exist.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.main.error.player-has-no-profile", "&cThe Player &e{0} &cdoes not have a permission profile.");
+		
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.get.success", "&7The Player &e{0} &7currently holds the group &e{1}&7.");
 		
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.name-already-exists", "&cGroup with the Name '&e{0}&c' does already exist&7.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.diplayName-already-exists", "&cGroup with the DisplayName '&e{0}&c' does already exist&7.");
