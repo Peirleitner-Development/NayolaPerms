@@ -68,6 +68,7 @@ public class NayolaPerms extends JavaPlugin {
 		new AsyncPlayerPreLoginListener();
 		new PlayerQuitListener();
 		new PlayerJoinListener();
+//		new UserMessageGetListener();
 
 	}
 
@@ -129,7 +130,7 @@ public class NayolaPerms extends JavaPlugin {
 
 		// Main
 		languageManager.registerNewMessage(pluginName, "prefix", "&9NayolaPerms> &f");
-		languageManager.registerNewMessage(pluginName, "main.no-permission", "&cThis action requires the rank &7[&e{0}&7] &cor higher&7.");
+		languageManager.registerNewMessage(pluginName, "main.no-permission", "&7This Action requires the rank [&9{0}&7] &7or higher.");
 		
 		// Commands
 		languageManager.registerNewMessage(pluginName, "command.rank.permanent", "&3Your current rank &e{0} &3never expires&7.");

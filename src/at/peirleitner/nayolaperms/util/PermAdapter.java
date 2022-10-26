@@ -1,50 +1,39 @@
 package at.peirleitner.nayolaperms.util;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissibleBase;
-
-import at.peirleitner.core.Core;
-import at.peirleitner.core.util.LogType;
-import at.peirleitner.nayolaperms.NayolaPerms;
-import at.peirleitner.nayolaperms.permission.PermGroup;
-import at.peirleitner.nayolaperms.permission.PermPlayer;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.ServerOperator;
 
 public class PermAdapter extends PermissibleBase {
 
-	private Player p;
-
-	public PermAdapter(Player opable) {
+	public PermAdapter(ServerOperator opable) {
 		super(opable);
-		this.p = opable;
+		// TODO Auto-generated constructor stub
+	}
+
+	private String permission;
+	private boolean is;
+
+	@Override
+	public boolean isPermissionSet(Permission perm) {
+		this.permission = perm.toString();
+		this.is = super.isPermissionSet(perm);
+		return is;
 	}
 
 	@Override
-	public boolean hasPermission(String permission) {
+	public boolean hasPermission(String inName) {
+		this.permission = inName;
+		this.is = super.hasPermission(inName);
+		return is;
+	}
 
-		Bukkit.broadcastMessage("A");
+	public final String getPermission() {
+		return permission;
+	}
 
-		PermPlayer pp = NayolaPerms.getInstance().getPermissionManager().getPlayer(p.getUniqueId());
-
-		PermGroup requiredGroup = NayolaPerms.getInstance().getPermissionManager()
-				.getRequiredGroupForPermission(permission);
-
-		if (requiredGroup != null) {
-
-			if (pp.getGroup().getPriority() >= requiredGroup.getPriority()) {
-				p.sendMessage("you have the perm " + permission);
-				return true;
-			} else {
-				p.sendMessage("This requires the group " + requiredGroup.getName() + " for perm " + permission);
-				return false;
-			}
-
-		} else {
-			Core.getInstance().log(this.getClass(), LogType.DEBUG,
-					"Permission '" + permission + "' isn't saved in any group.");
-		}
-
-		return super.hasPermission(permission);
+	public final boolean isSet() {
+		return is;
 	}
 
 }
