@@ -85,8 +85,12 @@ public class PermGroup {
 		return NayolaPerms.getInstance().getPermissionManager().getPermissions(this);
 	}
 	
+	public final PermPermission getPermission(@Nonnull String permission) {
+		return this.getPermissions().stream().filter(perm -> perm.getPermission().equalsIgnoreCase(permission)).findAny().orElse(null);
+	}
+	
 	public final boolean hasPermission(@Nonnull String permission) {
-		return this.getPermissions().stream().filter(perm -> perm.getPermission().equalsIgnoreCase(permission)).findAny().orElse(null) == null ? false : true;
+		return this.getPermission(permission) == null ? false : true;
 	}
 	
 	public final Collection<PermPlayer> getPlayers() {

@@ -148,7 +148,7 @@ public class CommandNayolaPerms implements CommandExecutor {
 								p == null ? Core.getInstance().getDefaultLanguage()
 										: Core.getInstance().getUserSystem().getUser(p.getUniqueId()).getLanguage(),
 								"command.nayolaperms.permission.get.success.permission", null);
-						
+
 						message = message.replace("{0}", pp.getPermission());
 						message = message.replace("{1}", pp.getGroup().getDisplayName());
 
@@ -191,7 +191,7 @@ public class CommandNayolaPerms implements CommandExecutor {
 								Arrays.asList(target.getDisplayName()), true);
 						return true;
 					}
-					
+
 					PermGroup pg = this.getPermissionManager().getGroupByName(args[3]);
 
 					if (pg == null) {
@@ -201,24 +201,34 @@ public class CommandNayolaPerms implements CommandExecutor {
 								true);
 						return true;
 					}
-					
+
 					PermGroup currentGroup = pp.getGroup();
 					boolean success = this.getPermissionManager().setGroup(pp, pg);
-					
-					Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(), "command.nayolaperms.group.set." + (success ? "success" : "error") + ".sender", Arrays.asList(target.getDisplayName(), currentGroup.getDisplayName(), pg.getDisplayName()), true);
-					
-					if(success) {
-						
+
+					Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+							"command.nayolaperms.group.set." + (success ? "success" : "error") + ".sender",
+							Arrays.asList(target.getDisplayName(), currentGroup.getDisplayName(), pg.getDisplayName()),
+							true);
+
+					if (success) {
+
 						Player p = null;
-						if(cs instanceof Player) {
+						if (cs instanceof Player) {
 							p = (Player) cs;
 						}
-						
-						target.sendMessage(NayolaPerms.getInstance().getPluginName(), "command.nayolaperms.group.set.success.target", Arrays.asList(p == null ? cs.getName() : Core.getInstance().getUserSystem().getUser(p.getUniqueId()).getDisplayName(), currentGroup.getDisplayName(), pg.getDisplayName()), true);
+
+						target.sendMessage(NayolaPerms.getInstance().getPluginName(),
+								"command.nayolaperms.group.set.success.target",
+								Arrays.asList(
+										p == null ? cs.getName()
+												: Core.getInstance().getUserSystem().getUser(p.getUniqueId())
+														.getDisplayName(),
+										currentGroup.getDisplayName(), pg.getDisplayName()),
+								true);
 					}
-					
+
 					return true;
-					
+
 				} else {
 					this.sendHelp(cs);
 					return true;
@@ -226,17 +236,26 @@ public class CommandNayolaPerms implements CommandExecutor {
 
 			} else if (args[0].equalsIgnoreCase("permission")) {
 
+				PermGroup pg = this.getPermissionManager().getGroupByName(args[2]);
+
+				if (pg == null) {
+					Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+							"command.nayolaperms.main.error.group-does-not-exist-name", Arrays.asList(args[2]), true);
+					return true;
+				}
+
+				String permission = args[3];
+
 				if (args[1].equalsIgnoreCase("add")) {
 
-					// Command: /np permission add <Group> <Perm>
-					int groupID = Integer.valueOf(args[2]);
-					String permission = args[3];
-
-					this.getPermissionManager().addPermission(cs, groupID, permission);
+					this.getPermissionManager().addPermission(cs, pg, permission);
 					return true;
 
 				} else if (args[1].equalsIgnoreCase("remove")) {
 
+					this.getPermissionManager().removePermission(cs, pg, permission);
+					return true;
+					
 				} else {
 					this.sendHelp(cs);
 					return true;

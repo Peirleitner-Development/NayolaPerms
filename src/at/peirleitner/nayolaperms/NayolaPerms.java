@@ -169,7 +169,15 @@ public class NayolaPerms extends JavaPlugin {
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.get.success.pre-text", "&7The Group &9{0} &7has the following Permissions (&9{1}&7)&8:");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.get.success.permission", "&8- &e{0} &7(From Group &6{1}&7)");
 		
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.add.error.permission-already-exists", "&cThe permission &e{1} &ccan't be added to the group &e{0} &cbecause it already belongs to &e{2}&c.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.add.error.already-has-permission", "&cThe group &e{0} &cdoes already have the permission &e{1} &cbased on group &e{2}&c.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.add.success", "&7Successfully added the permission &9{1} &7to the group &9{0}&7.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.add.error.sql", "&cCould not add permission &e{1} &cto group &e{0}&c, see console for details.");
+		
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.remove.error.does-not-have-permission", "&cThe group &e{0} &cdoes not have the permission &e{1}&c.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.remove.error.permission-does-not-belong-to-group", "&cThe group &e{0} &cdoes not own the permission &e{1}&c. This permission belongs to &e{2}&c.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.remove.success", "&7Successfully removed the permission &9{1} &7from the group &9{0}&7.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.remove.error.sql", "&cCould not remove permission &e{1} &cfrom group &e{0}&c, see console for details.");
 		
 		// Listener
 //		languageManager.registerNewMessage(pluginName, "listener.async-player-pre-login.error.no-database-connection", "Could not validate connection towards the permission database.");

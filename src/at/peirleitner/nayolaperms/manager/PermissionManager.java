@@ -37,6 +37,7 @@ public class PermissionManager {
 	private HashMap<UUID, PermissionAttachment> attachments;
 
 	private final String CANT_UPDATE_PERM_ATTACHMENTS_KICKED = ChatColor.RED + "Could not reload your permission attachments, please connect again.";
+	private final String PERMISSION_REMOVE_RESULT_SET_EMPTY = ChatColor.RED + "Row count on removed permissions returned 0. Manually check permissions inside '" + NayolaPerms.table_permissions + "' table.";
 	
 	public PermissionManager() {
 
@@ -366,8 +367,8 @@ public class PermissionManager {
 				return true;
 			}
 		} else {
-			Core.getInstance().log(getClass(), LogType.DEBUG,
-					"Permission " + permission + " is not saved in any saveType.");
+//			Core.getInstance().log(getClass(), LogType.DEBUG,
+//					"Permission " + permission + " is not saved in any saveType.");
 			return false;
 		}
 
@@ -388,6 +389,14 @@ public class PermissionManager {
 		}
 
 		return null;
+	}
+	
+	public final void reloadPermissionsForAllPlayers() {
+		
+		for(Player all : Bukkit.getOnlinePlayers()) {
+			this.reloadPermissions(all);
+		}
+		
 	}
 
 	public final boolean reloadPermissions(@Nonnull Player p) {
@@ -421,16 +430,17 @@ public class PermissionManager {
 		return true;
 	}
 
-	public final boolean addPermission(@Nonnull CommandSender cs, @Nonnull int groupID, @Nonnull String permission) {
+	public final boolean addPermission(@Nonnull CommandSender cs, @Nonnull PermGroup group, @Nonnull String permission) {
 
-		PermGroup group = this.getGroupByID(groupID);
-
-		if (group == null) {
-			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
-					"command.nayolaperms.main.error.group-does-not-exist", Arrays.asList("" + groupID), true);
-			return false;
+		for(PermPermission pp : this.getPermissions()) {
+			if(pp.getPermission().equalsIgnoreCase(permission)) {
+				Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+						"command.nayolaperms.permission.add.error.permission-already-exists",
+						Arrays.asList(group.getName(), permission, pp.getGroup().getDisplayName()), true);
+				return false;
+			}
 		}
-
+		
 		if (this.hasPermission(group, permission)) {
 			PermGroup lp = this.getLeastPriorityGroupWithPermission(permission);
 			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
@@ -439,7 +449,7 @@ public class PermissionManager {
 			return false;
 		}
 
-		PermPermission pp = new PermPermission(permission, groupID,
+		PermPermission pp = new PermPermission(permission, group.getID(),
 				Core.getInstance().getSettingsManager().getSaveType().getID());
 
 		try {
@@ -455,13 +465,77 @@ public class PermissionManager {
 
 			if (NayolaPerms.getInstance().isCachingEnabled()) {
 				this.getPermissions().add(pp);
+				this.reloadPermissionsForAllPlayers();
 			}
 
+			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+					"command.nayolaperms.permission.add.success",
+					Arrays.asList(group.getName(), permission), true);
 			return true;
 
 		} catch (SQLException e) {
 			Core.getInstance().log(getClass(), LogType.ERROR, "Could not add permission '" + permission + "' to group '"
 					+ group.toString() + "'/SQL: " + e.getMessage());
+			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+					"command.nayolaperms.permission.add.error.sql",
+					Arrays.asList(group.getName(), permission), true);
+			return false;
+		}
+
+	}
+	
+	public final boolean removePermission(@Nonnull CommandSender cs, @Nonnull PermGroup group, @Nonnull String permission) {
+
+		if (!this.hasPermission(group, permission)) {
+			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+					"command.nayolaperms.permission.remove.error.does-not-have-permission",
+					Arrays.asList(group.getDisplayName(), permission), true);
+			return false;
+		}
+		
+		PermGroup belongs = this.getLeastPriorityGroupWithPermission(permission);
+		
+		if(group.getID() != belongs.getID()) {
+			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+					"command.nayolaperms.permission.remove.error.permission-does-not-belong-to-group",
+					Arrays.asList(group.getDisplayName(), permission, belongs.getDisplayName()), true);
+			return false;
+		}
+
+		PermPermission pp = group.getPermission(permission);
+
+		try {
+
+			PreparedStatement stmt = NayolaPerms.getInstance().getMySQL().getConnection()
+					.prepareStatement("DELETE FROM " + NayolaPerms.table_permissions
+							+ " WHERE permission = ? AND groupID = ? AND saveType = ?");
+			stmt.setString(1, pp.getPermission());
+			stmt.setInt(2, pp.getGroupID());
+			stmt.setInt(3, pp.getServerID());
+
+			int i = stmt.executeUpdate();
+			
+			if(i <= 0) {
+				cs.sendMessage(PERMISSION_REMOVE_RESULT_SET_EMPTY);
+				return false;
+			}
+
+			if (NayolaPerms.getInstance().isCachingEnabled()) {
+				this.getPermissions().remove(pp);
+				this.reloadPermissionsForAllPlayers();
+			}
+
+			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+					"command.nayolaperms.permission.remove.success",
+					Arrays.asList(group.getName(), permission), true);
+			return true;
+
+		} catch (SQLException e) {
+			Core.getInstance().log(getClass(), LogType.ERROR, "Could not add permission '" + permission + "' to group '"
+					+ group.toString() + "'/SQL: " + e.getMessage());
+			Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+					"command.nayolaperms.permission.remove.error.sql",
+					Arrays.asList(group.getName(), permission), true);
 			return false;
 		}
 
