@@ -151,12 +151,14 @@ public class NayolaPerms extends JavaPlugin {
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.main.error.group-does-not-exist-id", "&cGroup with ID &e{0} &cdoes not exist.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.main.error.group-does-not-exist-name", "&cGroup with Name &e{0} &cdoes not exist.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.main.error.player-has-no-profile", "&cThe Player &e{0} &cdoes not have a permission profile.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.main.error.invalid-amount-of-days", "&cThe entered amount of days (&e{0}&c) is invalid.");
 		
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.get.success", "&7The Player &e{0} &7currently holds the group &e{1}&7.");
 		
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.set.success.sender", "&7Successfully changed the Group of &9{0} &7from &9{1} &7to &9{2}&7.");
-		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.set.success.error", "&cCould not change the Group of &e{0} &cfrom &e{1} &cto &e{2}&c, see console for details.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.set.error", "&cCould not change the Group of &e{0} &cfrom &e{1} &cto &e{2}&c, see console for details.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.set.success.target", "&9{0} &7changed your Group from &9{1} &7to &9{2}&7.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.set.success.expired", "&7Your Membership of the Group &9{0} &7has expired.");
 		
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.name-already-exists", "&cGroup with the Name '&e{0}&c' does already exist&7.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.diplayName-already-exists", "&cGroup with the DisplayName '&e{0}&c' does already exist&7.");
@@ -184,6 +186,10 @@ public class NayolaPerms extends JavaPlugin {
 		languageManager.registerNewMessage(pluginName, "listener.async-player-pre-login.error.could-not-create-player", "&cCould not create new player permission object; connection cancelled.");
 
 		// GUIs
+		languageManager.registerNewMessage(pluginName, "gui.my-permissions.title", "&3My Permissions ({0})");
+		languageManager.registerNewMessage(pluginName, "gui.my-permissions.item.permission.name", "&9Permission #{0}");
+		languageManager.registerNewMessage(pluginName, "gui.my-permissions.item.permission.description", "&7Node&8: &9{0}\n"
+				+ "&7Inherited from&8: &9{1}");
 
 	}
 

@@ -40,8 +40,8 @@ public class AsyncPlayerPreLoginListener implements Listener {
 
 		}
 
-		if (!NayolaPerms.getInstance().getPermissionManager().getPlayers().contains(pp)) {
-			NayolaPerms.getInstance().getPermissionManager().getPlayers().add(pp);
+		if (!NayolaPerms.getInstance().getPermissionManager().getCachedPlayers().contains(pp)) {
+			NayolaPerms.getInstance().getPermissionManager().getCachedPlayers().add(pp);
 		}
 
 	}

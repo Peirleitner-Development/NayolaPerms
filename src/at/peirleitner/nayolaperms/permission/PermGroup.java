@@ -97,7 +97,7 @@ public class PermGroup {
 		
 		Collection<PermPlayer> players = new ArrayList<>();
 		
-		for(PermPlayer pp : NayolaPerms.getInstance().getPermissionManager().getPlayers()) {
+		for(PermPlayer pp : NayolaPerms.getInstance().getPermissionManager().getCachedPlayers()) {
 			if(pp.getGroupID() == this.getID()) {
 				players.add(pp);
 			}

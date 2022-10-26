@@ -1,7 +1,9 @@
 package at.peirleitner.nayolaperms.command;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
@@ -12,6 +14,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import at.peirleitner.core.Core;
+import at.peirleitner.core.util.local.GUI;
+import at.peirleitner.core.util.local.ItemBuilder;
 import at.peirleitner.core.util.user.PredefinedMessage;
 import at.peirleitner.core.util.user.User;
 import at.peirleitner.nayolaperms.NayolaPerms;
@@ -34,13 +38,40 @@ public class CommandNayolaPerms implements CommandExecutor {
 		if (cs instanceof Player && args.length == 0) {
 
 			Player p = (Player) cs;
+			User user = Core.getInstance().getUserSystem().getUser(p.getUniqueId());
 			PermPlayer pp = this.getPermissionManager().getPlayer(p.getUniqueId());
+			Collection<PermPermission> permissions = this.getPermissionManager().getPermissionsFromAllGroups(pp.getGroup());
 
-			for (PermPermission perm : this.getPermissionManager().getPermissions()) {
-				cs.sendMessage((pp.hasPermission(perm.getPermission()) ? ChatColor.GREEN : ChatColor.RED) + "("
-						+ perm.getGroup().getName() + "): " + perm.getPermission());
+//			for (PermPermission perm : this.getPermissionManager().getPermissions()) {
+//				cs.sendMessage((pp.hasPermission(perm.getPermission()) ? ChatColor.GREEN : ChatColor.RED) + "("
+//						+ perm.getGroup().getName() + "): " + perm.getPermission());
+//			}
+			
+			GUI gui = new GUI(Core.getInstance().getLanguageManager().getMessage(NayolaPerms.getInstance().getPluginName(), user.getLanguage(), "gui.my-permissions.title", Arrays.asList("" + permissions.size())));
+			List<String> description = new ArrayList<>(2);
+			int i = 1;
+			
+			for(PermPermission perm : permissions) {
+				
+				description.clear();
+				
+				String desc[] = Core.getInstance().getLanguageManager().getMessage(NayolaPerms.getInstance().getPluginName(), user.getLanguage(), "gui.my-permissions.item.permission.description", 
+						Arrays.asList(perm.getPermission(), perm.getGroup().getDisplayName())
+						).split("\n");
+				
+				for(String s : desc) {
+					description.add(s);
+				}
+				
+				gui.addItem(new ItemBuilder(Material.PAPER)
+						.name(Core.getInstance().getLanguageManager().getMessage(NayolaPerms.getInstance().getPluginName(), user.getLanguage(), "gui.my-permissions.item.permission.name", Arrays.asList("" + i)))
+						.lore(description)
+						.build());
+				i++;
 			}
-
+			
+			gui.open(p);
+			
 			return true;
 		}
 
@@ -203,7 +234,7 @@ public class CommandNayolaPerms implements CommandExecutor {
 					}
 
 					PermGroup currentGroup = pp.getGroup();
-					boolean success = this.getPermissionManager().setGroup(pp, pg);
+					boolean success = this.getPermissionManager().setGroup(pp, pg, -1);
 
 					Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
 							"command.nayolaperms.group.set." + (success ? "success" : "error") + ".sender",
@@ -267,7 +298,83 @@ public class CommandNayolaPerms implements CommandExecutor {
 			}
 
 		} else if (args.length == 5) {
+			
+			if(args[0].equalsIgnoreCase("group") && args[1].equalsIgnoreCase("set")) {
+				
+				User target = Core.getInstance().getUserSystem().getByLastKnownName(args[2]);
 
+				if (target == null) {
+					cs.sendMessage(
+							Core.getInstance().getLanguageManager().getMessage(PredefinedMessage.NOT_REGISTERED));
+					return true;
+				}
+
+				PermPlayer pp = this.getPermissionManager().getPlayer(target.getUUID());
+
+				if (pp == null) {
+					Core.getInstance().getLanguageManager().sendMessage(cs,
+							NayolaPerms.getInstance().getPluginName(),
+							"command.nayolaperms.main.error.player-has-no-profile",
+							Arrays.asList(target.getDisplayName()), true);
+					return true;
+				}
+
+				PermGroup pg = this.getPermissionManager().getGroupByName(args[3]);
+
+				if (pg == null) {
+					Core.getInstance().getLanguageManager().sendMessage(cs,
+							NayolaPerms.getInstance().getPluginName(),
+							"command.nayolaperms.main.error.group-does-not-exist-name", Arrays.asList(args[3]),
+							true);
+					return true;
+				}
+				
+				int days = -1;
+				
+				try {
+					
+					days = Integer.valueOf(args[4]);
+					
+				}catch(NumberFormatException ex) {
+					Core.getInstance().getLanguageManager().sendMessage(cs,
+							NayolaPerms.getInstance().getPluginName(),
+							"command.nayolaperms.main.error.invalid-amount-of-days", Arrays.asList(args[4]),
+							true);
+					return true;
+				}
+
+				PermGroup currentGroup = pp.getGroup();
+				long expire = System.currentTimeMillis() + (1000L * 60 * 60 * 24 * days);
+				
+				boolean success = this.getPermissionManager().setGroup(pp, pg, expire);
+				
+				Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+						"command.nayolaperms.group.set." + (success ? "success" : "error") + ".sender",
+						Arrays.asList(target.getDisplayName(), currentGroup.getDisplayName(), pg.getDisplayName()),
+						true);
+
+				if (success) {
+
+					Player p = null;
+					if (cs instanceof Player) {
+						p = (Player) cs;
+					}
+
+					target.sendMessage(NayolaPerms.getInstance().getPluginName(),
+							"command.nayolaperms.group.set.success.target",
+							Arrays.asList(
+									p == null ? cs.getName()
+											: Core.getInstance().getUserSystem().getUser(p.getUniqueId())
+													.getDisplayName(),
+									currentGroup.getDisplayName(), pg.getDisplayName()),
+							true);
+				}
+				
+			} else {
+				this.sendHelp(cs);
+				return true;
+			}
+			
 		} else if (args.length == 6) {
 
 			if (args[0].equalsIgnoreCase("group")) {

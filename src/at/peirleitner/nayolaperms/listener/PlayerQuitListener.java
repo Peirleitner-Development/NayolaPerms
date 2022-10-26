@@ -21,10 +21,10 @@ public class PlayerQuitListener implements Listener {
 
 		Player p = e.getPlayer();
 
-		PermPlayer pp = NayolaPerms.getInstance().getPermissionManager().getPlayer(p.getUniqueId());
+		PermPlayer pp = NayolaPerms.getInstance().getPermissionManager().getPlayerFromCache(p.getUniqueId());
 
 		if (pp != null) {
-			NayolaPerms.getInstance().getPermissionManager().getPlayers().remove(pp);
+			NayolaPerms.getInstance().getPermissionManager().getCachedPlayers().remove(pp);
 		}
 		
 		new BukkitRunnable() {
