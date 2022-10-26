@@ -21,11 +21,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
 import at.peirleitner.core.Core;
+import at.peirleitner.core.SpigotMain;
 import at.peirleitner.core.util.LogType;
 import at.peirleitner.nayolaperms.NayolaPerms;
 import at.peirleitner.nayolaperms.permission.PermGroup;
 import at.peirleitner.nayolaperms.permission.PermPermission;
 import at.peirleitner.nayolaperms.permission.PermPlayer;
+import net.md_5.bungee.api.ChatColor;
 
 public class PermissionManager {
 
@@ -34,6 +36,8 @@ public class PermissionManager {
 	private Collection<PermPermission> permissions;
 	private HashMap<UUID, PermissionAttachment> attachments;
 
+	private final String CANT_UPDATE_PERM_ATTACHMENTS_KICKED = ChatColor.RED + "Could not reload your permission attachments, please connect again.";
+	
 	public PermissionManager() {
 
 		// Initialize
@@ -50,7 +54,7 @@ public class PermissionManager {
 	public HashMap<UUID, PermissionAttachment> getAttachments() {
 		return this.attachments;
 	}
-	
+
 	public Collection<PermGroup> getGroups() {
 		return groups;
 	}
@@ -221,6 +225,43 @@ public class PermissionManager {
 
 	}
 
+	public final boolean setGroup(@Nonnull PermPlayer pp, @Nonnull PermGroup group) {
+
+		if (pp.getGroupID() == group.getID()) {
+			Core.getInstance().log(getClass(), LogType.WARNING, "Did not update group of player '"
+					+ pp.getUUID().toString() + "' because it is already set to '" + group.getName() + "'.");
+			return false;
+		}
+		
+		PermGroup current = pp.getGroup();
+
+		try {
+			
+			PreparedStatement stmt = NayolaPerms.getInstance().getMySQL().getConnection().prepareStatement("UPDATE " + NayolaPerms.table_players + " SET groupID = ? WHERE uuid = ?");
+			stmt.setInt(1, group.getID());
+			stmt.setString(2, pp.getUUID().toString());
+			
+			stmt.executeUpdate();
+			
+			if(NayolaPerms.getInstance().isCachingEnabled()) {
+				pp.setGroupID(group.getID());
+				pp.reloadPermissions();
+			}
+			
+			Core.getInstance().log(getClass(), LogType.INFO,
+					"Updated Group of Player '" + pp.getUUID().toString() + "' from '" + current.getName()
+							+ "' to '" + group.getName() + "'.");
+			return true;
+			
+		} catch (SQLException e) {
+			Core.getInstance().log(getClass(), LogType.ERROR,
+					"Could not set Group of Player '" + pp.getUUID().toString() + "' from '" + current.getName()
+							+ "' to '" + group.getName() + "'/SQL: " + e.getMessage());
+			return true;
+		}
+
+	}
+
 	private final PermGroup getGroupByResultSet(@Nonnull ResultSet rs) throws SQLException {
 
 		int id = rs.getInt(1);
@@ -262,11 +303,11 @@ public class PermissionManager {
 		this.loadGroupsFromDatabase();
 		this.loadPermissionsFromDatabase();
 		this.loadPlayersFromDatabase();
-		
-		for(Player all : Bukkit.getOnlinePlayers()) {
+
+		for (Player all : Bukkit.getOnlinePlayers()) {
 			this.reloadPermissions(all);
 		}
-		
+
 	}
 
 	public final void loadPermissionsFromDatabase() {
@@ -310,12 +351,11 @@ public class PermissionManager {
 	public final boolean hasPermission(@Nonnull PermGroup group, @Nonnull String permission) {
 
 		PermGroup least = this.getLeastPriorityGroupWithPermission(permission);
-		
-		
+
 		if (least != null) {
-			
+
 //			Core.getInstance().log(getClass(), LogType.DEBUG, "Permission " + permission + " requires the group " + least.getName() + " (P: " + least.getPriority() + "). Entered group: " + group.getName() + "(P: " + group.getPriority() + ").");
-			
+
 			if (group.getPriority() < least.getPriority()) {
 //				Core.getInstance().log(getClass(), LogType.DEBUG, "Group " + least.toString() + " has permission "
 //						+ permission + " at least priority. Entered group higher: NO");
@@ -349,28 +389,35 @@ public class PermissionManager {
 
 		return null;
 	}
-	
+
 	public final boolean reloadPermissions(@Nonnull Player p) {
-		
-		PermPlayer pp = this.getPlayer(p.getUniqueId());
-		
-		if(pp == null) {
-			// null
+
+		if(p == null) {
+			Core.getInstance().log(getClass(), LogType.WARNING, "Could not update permissions (Attachments) of entered player because it is null.");
 			return false;
 		}
 		
-		if(this.getAttachments().get(p.getUniqueId()) != null) {
+		PermPlayer pp = this.getPlayer(p.getUniqueId());
+
+		if (pp == null) {
+			Core.getInstance().log(getClass(), LogType.WARNING, "Could not update permissions (Attachments) of player '" + p.getUniqueId().toString() + "' because the perm player object is null. Removing player for security reasons.");
+			p.kickPlayer(CANT_UPDATE_PERM_ATTACHMENTS_KICKED);
+			return false;
+		}
+
+		if (this.getAttachments().get(p.getUniqueId()) != null) {
 			p.removeAttachment(this.getAttachments().get(p.getUniqueId()));
 			this.getAttachments().remove(p.getUniqueId(), this.getAttachments().get(p.getUniqueId()));
 		}
-		
+
 		PermissionAttachment attachment = p.addAttachment(NayolaPerms.getInstance());
 		this.getAttachments().put(p.getUniqueId(), attachment);
-		
-		for(PermPermission permissions : this.getPermissionsFromAllGroups(pp.getGroup())) {
+
+		for (PermPermission permissions : this.getPermissionsFromAllGroups(pp.getGroup())) {
 			attachment.setPermission(permissions.getPermission(), true);
 		}
-		
+
+		SpigotMain.getInstance().getLocalScoreboard().refreshDefaultTeams();
 		return true;
 	}
 
@@ -425,6 +472,13 @@ public class PermissionManager {
 		if (!NayolaPerms.getInstance().getMySQL().isConnected()) {
 			Core.getInstance().log(getClass(), LogType.DEBUG,
 					"Not loading players from Database because no connection has been established.");
+			return;
+		}
+
+		if (!Core.getInstance().getSettingsManager().isSetting(NayolaPerms.getInstance().getPluginName(),
+				"load-players-on-server-start")) {
+			Core.getInstance().log(getClass(), LogType.DEBUG,
+					"Not loading players from Database because loading them on server start has been disabled.");
 			return;
 		}
 
@@ -635,30 +689,30 @@ public class PermissionManager {
 //
 //		return permList;
 //	}
-	
+
 	public final Collection<PermPermission> getPermissions(@Nonnull PermGroup group) {
-		
+
 		Collection<PermPermission> permList = new ArrayList<>();
-		
-		for(PermPermission permission : this.getPermissions()) {
-			if(permission.getGroup().getID() == group.getID()) {
+
+		for (PermPermission permission : this.getPermissions()) {
+			if (permission.getGroup().getID() == group.getID()) {
 				permList.add(permission);
 			}
 		}
-		
+
 		return permList;
 	}
-	
+
 	public final Collection<PermPermission> getPermissionsFromAllGroups(@Nonnull PermGroup group) {
-		
+
 		Collection<PermPermission> permList = new ArrayList<>();
-		
-		for(PermPermission permission : this.getPermissions()) {
-			if(permission.getGroup().getPriority() <= group.getPriority()) {
+
+		for (PermPermission permission : this.getPermissions()) {
+			if (permission.getGroup().getPriority() <= group.getPriority()) {
 				permList.add(permission);
 			}
 		}
-		
+
 		return permList;
 	}
 

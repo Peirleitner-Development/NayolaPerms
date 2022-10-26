@@ -174,6 +174,51 @@ public class CommandNayolaPerms implements CommandExecutor {
 
 				if (args[1].equalsIgnoreCase("set")) {
 
+					User target = Core.getInstance().getUserSystem().getByLastKnownName(args[2]);
+
+					if (target == null) {
+						cs.sendMessage(
+								Core.getInstance().getLanguageManager().getMessage(PredefinedMessage.NOT_REGISTERED));
+						return true;
+					}
+
+					PermPlayer pp = this.getPermissionManager().getPlayer(target.getUUID());
+
+					if (pp == null) {
+						Core.getInstance().getLanguageManager().sendMessage(cs,
+								NayolaPerms.getInstance().getPluginName(),
+								"command.nayolaperms.main.error.player-has-no-profile",
+								Arrays.asList(target.getDisplayName()), true);
+						return true;
+					}
+					
+					PermGroup pg = this.getPermissionManager().getGroupByName(args[3]);
+
+					if (pg == null) {
+						Core.getInstance().getLanguageManager().sendMessage(cs,
+								NayolaPerms.getInstance().getPluginName(),
+								"command.nayolaperms.main.error.group-does-not-exist-name", Arrays.asList(args[3]),
+								true);
+						return true;
+					}
+					
+					PermGroup currentGroup = pp.getGroup();
+					boolean success = this.getPermissionManager().setGroup(pp, pg);
+					
+					Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(), "command.nayolaperms.group.set." + (success ? "success" : "error") + ".sender", Arrays.asList(target.getDisplayName(), currentGroup.getDisplayName(), pg.getDisplayName()), true);
+					
+					if(success) {
+						
+						Player p = null;
+						if(cs instanceof Player) {
+							p = (Player) cs;
+						}
+						
+						target.sendMessage(NayolaPerms.getInstance().getPluginName(), "command.nayolaperms.group.set.success.target", Arrays.asList(p == null ? cs.getName() : Core.getInstance().getUserSystem().getUser(p.getUniqueId()).getDisplayName(), currentGroup.getDisplayName(), pg.getDisplayName()), true);
+					}
+					
+					return true;
+					
 				} else {
 					this.sendHelp(cs);
 					return true;

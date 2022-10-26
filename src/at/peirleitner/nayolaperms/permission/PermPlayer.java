@@ -5,6 +5,9 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import at.peirleitner.core.util.GlobalUtils;
 import at.peirleitner.nayolaperms.NayolaPerms;
 
@@ -93,6 +96,14 @@ public class PermPlayer {
 	
 	public final boolean hasPermission(@Nonnull String perm) {
 		return NayolaPerms.getInstance().getPermissionManager().hasPermission(this.getGroup(), perm);
+	}
+	
+	public final Player getBukkitPlayer() {
+		return Bukkit.getPlayer(this.getUUID());
+	}
+	
+	public final boolean reloadPermissions() {
+		return NayolaPerms.getInstance().getPermissionManager().reloadPermissions(this.getBukkitPlayer());
 	}
 
 	@Override
