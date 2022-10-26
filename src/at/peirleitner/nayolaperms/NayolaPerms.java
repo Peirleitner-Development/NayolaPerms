@@ -144,11 +144,11 @@ public class NayolaPerms extends JavaPlugin {
 				+ "  &epermission &6get &f<Group>\n" // 3
 				+ "  &epermission &6add &f<Group> <Permission>\n" // 4
 				+ "  &epermission &6remove &f<Group> <Permission>\n" // 4
-				+ "  &eplayer &6get &f<Player>\n" // 3
 				+ "  &ereload \n" // 1
 				+ "  &eloadDefaultGroups");  // 1
 		
-		languageManager.registerNewMessage(pluginName, "command.nayolaperms.main.error.group-does-not-exist", "&cGroup with ID &e{0} &cdoes not exist.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.main.error.group-does-not-exist-id", "&cGroup with ID &e{0} &cdoes not exist.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.main.error.group-does-not-exist-name", "&cGroup with Name &e{0} &cdoes not exist.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.main.error.player-has-no-profile", "&cThe Player &e{0} &cdoes not have a permission profile.");
 		
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.get.success", "&7The Player &e{0} &7currently holds the group &e{1}&7.");
@@ -159,6 +159,10 @@ public class NayolaPerms extends JavaPlugin {
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.hexColor-already-exists", "&cGroup with the HexColor '&e{0}&c' does already exist&7.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.priority-already-exists", "&cGroup with the Priority '&e{0}&c' does already exist&7.");
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.group.create.error.default-group-already-exists", "&cA default group '&e{0}&c' does already exist&7.");
+		
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.get.success.no-permissions", "&7The Group &9{0} &7does not have any Permissions associated with them.");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.get.success.pre-text", "&7The Group &9{0} &7has the following Permissions (&9{1}&7)&8:");
+		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.get.success.permission", "&8- &e{0} &7(From Group &6{1}&7)");
 		
 		languageManager.registerNewMessage(pluginName, "command.nayolaperms.permission.add.error.already-has-permission", "&cThe group &e{0} &cdoes already have the permission &e{1} &cbased on group &e{2}&c.");
 		

@@ -1,6 +1,7 @@
 package at.peirleitner.nayolaperms.command;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import javax.annotation.Nonnull;
 
@@ -107,14 +108,55 @@ public class CommandNayolaPerms implements CommandExecutor {
 
 				if (args[1].equalsIgnoreCase("get")) {
 
-				} else {
-					this.sendHelp(cs);
+					PermGroup pg = this.getPermissionManager().getGroupByName(args[2]);
+
+					if (pg == null) {
+						Core.getInstance().getLanguageManager().sendMessage(cs,
+								NayolaPerms.getInstance().getPluginName(),
+								"command.nayolaperms.main.error.group-does-not-exist-name", Arrays.asList(args[2]),
+								true);
+						return true;
+					}
+
+					Collection<PermPermission> permissions = this.getPermissionManager()
+							.getPermissionsFromAllGroups(pg);
+
+					if (permissions.isEmpty()) {
+						Core.getInstance().getLanguageManager().sendMessage(cs,
+								NayolaPerms.getInstance().getPluginName(),
+								"command.nayolaperms.permission.get.success.no-permissions",
+								Arrays.asList(pg.getDisplayName()), true);
+						return true;
+					}
+
+					Core.getInstance().getLanguageManager().sendMessage(cs, NayolaPerms.getInstance().getPluginName(),
+							"command.nayolaperms.permission.get.success.pre-text",
+							Arrays.asList(pg.getDisplayName(), "" + permissions.size()), true);
+
+					Player p = null;
+
+					if (cs instanceof Player) {
+						p = (Player) cs;
+					}
+
+					String message = null;
+
+					for (PermPermission pp : permissions) {
+
+						message = Core.getInstance().getLanguageManager().getMessage(
+								NayolaPerms.getInstance().getPluginName(),
+								p == null ? Core.getInstance().getDefaultLanguage()
+										: Core.getInstance().getUserSystem().getUser(p.getUniqueId()).getLanguage(),
+								"command.nayolaperms.permission.get.success.permission", null);
+						
+						message = message.replace("{0}", pp.getPermission());
+						message = message.replace("{1}", pp.getGroup().getDisplayName());
+
+						cs.sendMessage(message);
+
+					}
+
 					return true;
-				}
-
-			} else if (args[0].equalsIgnoreCase("player")) {
-
-				if (args[1].equalsIgnoreCase("get")) {
 
 				} else {
 					this.sendHelp(cs);
