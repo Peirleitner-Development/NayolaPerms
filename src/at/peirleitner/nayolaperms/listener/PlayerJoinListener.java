@@ -22,8 +22,6 @@ public class PlayerJoinListener implements Listener {
 		Player p = e.getPlayer();
 		this.sendRankInfo(p);
 		NayolaPerms.getInstance().getPermissionManager().reloadPermissions(p);
-		
-		Core.getInstance().log(this.getClass(), LogType.DEBUG, "" + System.currentTimeMillis());
 
 	}
 
