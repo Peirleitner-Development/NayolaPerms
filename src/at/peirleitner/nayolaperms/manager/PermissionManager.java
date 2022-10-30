@@ -67,6 +67,7 @@ public class PermissionManager {
 			public void run() {
 
 				for (PermPlayer pp : getCachedPlayers()) {
+					
 					if (pp.getExpire() != -1 && System.currentTimeMillis() >= pp.getExpire()) {
 						PermGroup current = pp.getGroup();
 						setGroup(pp, getDefaultGroup(), -1);
