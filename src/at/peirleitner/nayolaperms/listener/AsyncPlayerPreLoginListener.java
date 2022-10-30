@@ -36,6 +36,8 @@ public class AsyncPlayerPreLoginListener implements Listener {
 						"listener.async-player-pre-login.error.could-not-create-player", null);
 				e.disallow(Result.KICK_OTHER, result);
 
+			} else {
+				pp = NayolaPerms.getInstance().getPermissionManager().getPlayer(e.getUniqueId());
 			}
 
 		}

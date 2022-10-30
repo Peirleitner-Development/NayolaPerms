@@ -7,7 +7,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import at.peirleitner.core.Core;
-import at.peirleitner.core.util.LogType;
 import at.peirleitner.nayolaperms.NayolaPerms;
 
 public class PlayerJoinListener implements Listener {

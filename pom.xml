@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.peirleitner</groupId>
 	<artifactId>NayolaPerms</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>at.peirleitner</groupId>
 			<artifactId>Core</artifactId>
-			<version>1.0.7</version>
+			<version>1.0.9</version>
 		</dependency>
 	</dependencies>
 </project>
