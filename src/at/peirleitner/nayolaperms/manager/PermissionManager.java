@@ -358,8 +358,9 @@ public class PermissionManager {
 		try {
 
 			PreparedStatement stmt = NayolaPerms.getInstance().getMySQL().getConnection()
-					.prepareStatement("SELECT * FROM " + NayolaPerms.table_permissions + " WHERE saveType = ?");
+					.prepareStatement("SELECT * FROM " + NayolaPerms.table_permissions + " WHERE saveType = ? OR saveType = ?");
 			stmt.setInt(1, Core.getInstance().getSettingsManager().getSaveType().getID());
+			stmt.setInt(2, -1);
 			ResultSet rs = stmt.executeQuery();
 
 			while (rs.next()) {
