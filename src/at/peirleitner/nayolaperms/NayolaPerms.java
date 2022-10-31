@@ -16,7 +16,6 @@ import at.peirleitner.core.manager.LanguageManager;
 import at.peirleitner.core.util.LogType;
 import at.peirleitner.core.util.database.CredentialsFile;
 import at.peirleitner.core.util.database.MySQL;
-import at.peirleitner.core.util.database.TableType;
 import at.peirleitner.nayolaperms.command.CommandGroups;
 import at.peirleitner.nayolaperms.command.CommandNayolaPerms;
 import at.peirleitner.nayolaperms.command.CommandRank;
@@ -223,9 +222,7 @@ public class NayolaPerms extends JavaPlugin {
 				+ "groupID INT NOT NULL, "
 				+ "saveType INT NOT NULL, "
 				+ "PRIMARY KEY (permission, groupID, saveType), "
-				+ "FOREIGN KEY (groupID) REFERENCES " + table_groups + "(id), "
-				+ "FOREIGN KEY (saveType) REFERENCES " + TableType.SAVE_TYPE.getTableName(true) + "(id)"
-				+ ");");
+				+ "FOREIGN KEY (groupID) REFERENCES " + table_groups + "(id));");
 		
 		for(String s : statements) {
 			
