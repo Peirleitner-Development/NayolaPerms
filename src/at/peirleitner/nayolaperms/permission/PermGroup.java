@@ -50,7 +50,7 @@ public class PermGroup {
 	}
 	
 	public String getDisplayName() {
-		return ChatColor.of(this.getRank().getColor()) + this.getName();
+		return (this.getRank() == null ? this.getName() : ChatColor.of(this.getRank().getColor()) + this.getName());
 	}
 
 	public void setName(String name) {
